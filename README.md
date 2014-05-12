@@ -28,9 +28,9 @@ Execution syntax is simple
 ```
 infile -- file containing the time series data. The file should contain three lines, each tab separated, with equal number of entries. The first line contains sample times, the second line contains the number of samples of the focal allele (must be integers) and the third line containes total number of samples at each time point (must be integers). For example
 
-0 10 20
-2000 4000 6000
-10000 10000 10000
+0 10 20<br>
+2000 4000 6000<br>
+10000 10000 10000<br>
 
 OPTIONS:<br>
 -f -- treat sampled frequencies as actual frequencies<br>
