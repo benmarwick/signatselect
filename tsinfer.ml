@@ -119,7 +119,7 @@ let vec2mat_diag diag =
     for i = 0 to n-1 do
       mat.(i).(i) <- diag.(i);
     done;
-    Gsl_matrix_flat.of_arrays mat
+    Gsl.Matrix_flat.of_arrays mat
 
 
 let vec2mat_tridiag m = 
@@ -132,7 +132,7 @@ let vec2mat_tridiag m =
       mat.(succ i).(i) <- m.below.(i);
     done;
     mat.(pred n).(pred n) <- m.diag.(pred n);
-    Gsl_matrix_flat.of_arrays mat
+    Gsl.Matrix_flat.of_arrays mat
 
 
 
@@ -169,18 +169,18 @@ let progonka a b c f =
 let invert_tridiag m =
   let n = Array.length m.diag in
   let _ = if Array.length m.above <> pred n || Array.length m.below <> pred n then failwith "invert_tridiag failed!"
-  and diag = Gsl_vectmat.vec_convert ~protect:true (`A m.diag) 
-  and abovediag = Gsl_vectmat.vec_convert ~protect:true (`A m.above)
-  and belowdiag = Gsl_vectmat.vec_convert ~protect:true (`A m.below)
+  and diag = Gsl.Vectmat.vec_convert ~protect:true (`A m.diag)
+  and abovediag = Gsl.Vectmat.vec_convert ~protect:true (`A m.above)
+  and belowdiag = Gsl.Vectmat.vec_convert ~protect:true (`A m.below)
   and invm = Array.make_matrix n n nan in
     for i = 0 to n - 1 do
       let barr = Array.make n 0.
-      and x = Gsl_vectmat.vec_convert ~protect:false (`A (Array.make n nan)) in
+      and x = Gsl.Vectmat.vec_convert ~protect:false (`A (Array.make n nan)) in
 	barr.(i) <- 1.;
-	Gsl_linalg.solve_tridiag ~diag ~abovediag ~belowdiag ~b:(Gsl_vectmat.vec_convert ~protect:false (`A barr)) ~x;
-	invm.(i) <- Gsl_vectmat.to_array x
+	Gsl.Linalg.solve_tridiag ~diag ~abovediag ~belowdiag ~b:(Gsl.Vectmat.vec_convert ~protect:false (`A barr)) ~x;
+	invm.(i) <- Gsl.Vectmat.to_array x
     done;
-    Gsl_matrix_flat.of_arrays invm
+    Gsl.Matrix_flat.of_arrays invm
     
 
 
@@ -201,30 +201,30 @@ let det_tridiag m =
 
 (* apply function f to all elements of a vector *)
 let map_vec_flat f v =
-  Gsl_vector_flat.of_array (Array.map f (Gsl_vector_flat.to_array v))
+  Gsl.Vector_flat.of_array (Array.map f (Gsl.Vector_flat.to_array v))
 ;;
 
 
 
 (* matrix - vector multiplication *)
 let mult_mv_flat ~m ~v =
-  let n1, n2 = Gsl_matrix_flat.dims m in
-  let y = Gsl_vector_flat.create n1 in
-  let _ = Gsl_blas_flat.gemv Gsl_blas_flat.NoTrans ~alpha:1. ~a:m ~x:v ~beta:0. ~y in
+  let n1, n2 = Gsl.Matrix_flat.dims m in
+  let y = Gsl.Vector_flat.create n1 in
+  let _ = Gsl.Blas_flat.gemv Gsl.Blas_flat.NoTrans ~alpha:1. ~a:m ~x:v ~beta:0. ~y in
     y
 
 
 let mult_mm_flat ~m1 ~m2 =
-  let n11, n12 = Gsl_matrix_flat.dims m1 
-  and n21, n22 = Gsl_matrix_flat.dims m1 in
+  let n11, n12 = Gsl.Matrix_flat.dims m1
+  and n21, n22 = Gsl.Matrix_flat.dims m1 in
   let _ = if n12 <> n21 then failwith "mult_mm_flat : matrix dimensions do not match!" in
-  let m = Gsl_matrix_flat.create n11 n22 in
-  let _ = Gsl_blas_flat.gemm ~ta:Gsl_blas_flat.NoTrans ~tb:Gsl_blas_flat.NoTrans ~alpha:1. ~a:m1 ~b:m2 ~beta:0. ~c:m in
+  let m = Gsl.Matrix_flat.create n11 n22 in
+  let _ = Gsl.Blas_flat.gemm ~ta:Gsl.Blas_flat.NoTrans ~tb:Gsl.Blas_flat.NoTrans ~alpha:1. ~a:m1 ~b:m2 ~beta:0. ~c:m in
     m
 
 
 
-let invert_flat m = Gsl_vectmat.mat_flat (Gsl_linalg.invert_LU ~protect:true (`MF m))
+let invert_flat m = Gsl.Vectmat.mat_flat (Gsl.Linalg.invert_LU ~protect:true (`MF m))
 
 
 
@@ -243,9 +243,9 @@ let invert_flat m = Gsl_vectmat.mat_flat (Gsl_linalg.invert_LU ~protect:true (`M
 
 
 let print_state n minim iter =
-  let x = Gsl_vector.create n in
-  let f = Gsl_multimin.NoDeriv.minimum ~x minim in
-  let ssval = Gsl_multimin.NoDeriv.size minim in
+  let x = Gsl.Vector.create n in
+  let f = Gsl.Multimin.NoDeriv.minimum ~x minim in
+  let ssval = Gsl.Multimin.NoDeriv.size minim in
     print_endline (Printf.sprintf "iter %d : s = %.5f, alpha = %.3e, f() = %.5g, ssize=%.2f" iter x.{0} x.{1} f ssval)
 ;;
 
@@ -274,7 +274,7 @@ let find_min_interval ~f ~min ~max ~delta0 ~mindelta ~deltafact ?(verbose=false)
 	  let newdelta =
 	    if delta > mindelta
 	    then (delta /. 2.)
-	    else let y = Gsl_vector.of_array [|x|] in raise (Minimizer_failed (Small, y, fx))
+	    else let y = Gsl.Vector.of_array [|x|] in raise (Minimizer_failed (Small, y, fx))
 	  in
 	    ff (a +. newdelta)  (a, nan) (fa, nan) newdelta
       else if b = infinity then (a, infinity, infinity)
@@ -292,21 +292,21 @@ let find_min_interval ~f ~min ~max ~delta0 ~mindelta ~deltafact ?(verbose=false)
 
 let find_min f ~x1 ~x2 ~guess ~maxiter ~maxx ~abserr =
   (* print_endline (Printf.sprintf "START: x1 = %.5f; x2 = %.5f; guess = %.5f" x1 x2 guess); *)
-  let xvec = Gsl_vector.create 1
-  and s = Gsl_min.make Gsl_min.GOLDENSECTION f guess x1 x2 in 
+  let xvec = Gsl.Vector.create 1
+  and s = Gsl.Min.make Gsl.Min.GOLDENSECTION f guess x1 x2 in
   let rec proc i x = function
       true -> (x, f x);
     | false when i >= maxiter ->	
-	Gsl_vector.set xvec 0 x;
+	Gsl.Vector.set xvec 0 x;
 	raise (Minimizer_failed (Iter, xvec, f x))
     | false when x > maxx ->
-	Gsl_vector.set xvec 0 x;
+	Gsl.Vector.set xvec 0 x;
 	raise (Minimizer_failed (Large, xvec, f x))
     | _ ->
-	Gsl_min.iterate s;
-	let (a, b) = Gsl_min.interval s in
-	let new_x = Gsl_min.minimum s in
-	let status = Gsl_min.test_interval ~x_lo:a ~x_up:b ~epsabs:abserr ~epsrel:def_relerr in
+	Gsl.Min.iterate s;
+	let (a, b) = Gsl.Min.interval s in
+	let new_x = Gsl.Min.minimum s in
+	let status = Gsl.Min.test_interval ~x_lo:a ~x_up:b ~epsabs:abserr ~epsrel:def_relerr in
 	  proc (succ i) new_x status
   in
   let (r1,r2) as zz = proc 0 guess false in
@@ -330,7 +330,7 @@ let get_ml_alpha_inf mylf_s ~prec ~maxiter ~verbose ~guess =
       find_min_interval ~f:mylf_s ~min ~max ~delta0 ~mindelta:prec ~deltafact:1. ~verbose
     with
 	Minimizer_failed (code, xbad, fbad) ->
-	  let y = Gsl_vector.of_array [|xbad.{0}; infinity|] in raise (Minimizer_failed (Small, y, fbad))
+	  let y = Gsl.Vector.of_array [|xbad.{0}; infinity|] in raise (Minimizer_failed (Small, y, fbad))
   in
   let _ = if verbose then print_endline (Printf.sprintf "Interval containing the ML value: (%.5f, %.5f), guess = %.5f\n" s1 s2 s0) in
     find_min mylf_s ~x1:s1 ~x2:s2 ~guess:s0 ~maxiter ~maxx:def_maxs ~abserr:prec
@@ -342,25 +342,25 @@ let get_ml_alpha_inf mylf_s ~prec ~maxiter ~verbose ~guess =
 
 (* simplex method for the nll mimization *)
 let find_min_2d (gf, gf_inf) ~iffreq ~start ~step_size ~maxiter ~maxalpha ~minalpha epsabs ?(verbose=false)  =
-  let n = Gsl_vector.length start in
-  let x = Gsl_vector.create n in
-  let minim = Gsl_multimin.NoDeriv.make Gsl_multimin.NoDeriv.NM_SIMPLEX n gf  ~x:start ~step_size in
+  let n = Gsl.Vector.length start in
+  let x = Gsl.Vector.create n in
+  let minim = Gsl.Multimin.NoDeriv.make Gsl.Multimin.NoDeriv.NM_SIMPLEX n gf  ~x:start ~step_size in
   let rec proc iter = 
-    Gsl_multimin.NoDeriv.iterate minim ;
-    let status = Gsl_multimin.NoDeriv.test_size minim epsabs in
+    Gsl.Multimin.NoDeriv.iterate minim ;
+    let status = Gsl.Multimin.NoDeriv.test_size minim epsabs in
       match status with
           true ->
 (*	      Printf.printf "Minimum found at:\n" ;
 	      print_state n minim iter; *)
-	      let value = Gsl_multimin.NoDeriv.minimum ~x minim in
+	      let value = Gsl.Multimin.NoDeriv.minimum ~x minim in
 		(x, value)
 	| false when iter >= maxiter -> 
 	    if verbose then print_state n minim iter;
 (*	    let x = Gsl_vector.create n in *)
-	    let value = Gsl_multimin.NoDeriv.minimum ~x minim in
+	    let value = Gsl.Multimin.NoDeriv.minimum ~x minim in
 	      raise (Minimizer_failed (Iter, x, value))
 	| false ->
-	    let value = Gsl_multimin.NoDeriv.minimum ~x minim in
+	    let value = Gsl.Multimin.NoDeriv.minimum ~x minim in
 	      if x.{1} > maxalpha then
 		let _ = print_endline "Maximum alpha value reached. Trying to maximize the likelihood function at alpha = inf"
 		and (mlsinf, fmininf) =
@@ -400,17 +400,17 @@ let find_min_2d (gf, gf_inf) ~iffreq ~start ~step_size ~maxiter ~maxalpha ~minal
 
 
 let find_zero f alpha_1 alpha_2 alpha_guess max_iter abserr =
-  let s = Gsl_root.Bracket.make Gsl_root.Bracket.BISECTION f alpha_1 alpha_2 in
+  let s = Gsl.Root.Bracket.make Gsl.Root.Bracket.BISECTION f alpha_1 alpha_2 in
   let rec proc i alpha = function
       true -> alpha
     | false when i > max_iter ->
 	Printf.printf "Did not converge after %d iterations.\n" max_iter;
 	alpha
     | _ ->
-	Gsl_root.Bracket.iterate s;
-	let (a, b) = Gsl_root.Bracket.interval s in
-	let new_alpha = Gsl_root.Bracket.root s in
-	let status = Gsl_root.test_interval a b abserr 0. in
+	Gsl.Root.Bracket.iterate s;
+	let (a, b) = Gsl.Root.Bracket.interval s in
+	let new_alpha = Gsl.Root.Bracket.root s in
+	let status = Gsl.Root.test_interval a b abserr 0. in
 	  proc (succ i) new_alpha status
   in
     proc 0 alpha_guess false
@@ -434,16 +434,16 @@ let filter_lh ~lh_method ~s ~alpha x =
   match x with
       0. -> max_float
     | lh when lh = infinity -> -.max_float
-    | lh when lh < 0. -> raise (Gsl_error.Gsl_exn (Gsl_error.EBADFUNC, (Printf.sprintf "%s : negative likelihood value at (s, alpha) = (%.5f, %.3e); L = %.5g\n" lh_method s alpha lh)) )
+    | lh when lh < 0. -> raise (Gsl.Error.Gsl_exn (Gsl.Error.EBADFUNC, (Printf.sprintf "%s : negative likelihood value at (s, alpha) = (%.5f, %.3e); L = %.5g\n" lh_method s alpha lh)) )
     | lh -> -. (log lh)
 ;;
 
 
 
 let chi2cdf ~prec x =
-    let ws = Gsl_integration.make_ws 30 in
-    let res = Gsl_integration.qag (Gsl_randist.chisq_pdf ~nu:1.) ~a:0. ~b:x ~epsabs:0. ~epsrel:def_relerr ~limit:30 Gsl_integration.GAUSS31 ws in
-      res.Gsl_fun.res
+    let ws = Gsl.Integration.make_ws 30 in
+    let res = Gsl.Integration.qag (Gsl.Randist.chisq_pdf ~nu:1.) ~a:0. ~b:x ~epsabs:0. ~epsrel:def_relerr ~limit:30 Gsl.Integration.GAUSS31 ws in
+      res.Gsl.Fun.res
 ;;
 
 
@@ -486,7 +486,7 @@ let eval_laplace ~f ~a ~b ~prec ~maxiter ~verbose =
 (*	if verbose then printf "Maximum of the f(x) at xmax = %.5g:\tf(xmax) = %.5g, f''(xmax) = %.5g, int = %.5g\n" xmax fmax f2max (-. fmax +. ( (log (2. *. Gsl_math.pi)) -. (log (-.f2max)) ) /. 2.);  *)
 	if abs_float f2max < prec then begin printf "Laplace method failed because the second derivative appears to be zero at the maximum.";  exit 1 end;
 	if f2max > 0. then begin "Laplace method failed because the second derivative appears to be positive at the maximum (non-sense!)"; exit 1 end;
-	-. fmax +. ( (log (2. *. Gsl_math.pi)) -. (log (-.f2max)) ) /. 2.
+	-. fmax +. ( (log (2. *. Gsl.Math.pi)) -. (log (-.f2max)) ) /. 2.
     with
 	Minimizer_failed (code, xmin_bad, fmin_bad) -> failwith "Could not evaluate the integral with respect to x0 using Laplace's methods: the minimum of the f(x) function was not found!"
 	  
@@ -503,12 +503,12 @@ let eval_laplace ~f ~a ~b ~prec ~maxiter ~verbose =
 let get_new_mu_sigma ~mu1 ~cov1 ~mu2 ~cov2 = 
   let cov1inv = invert_flat cov1
   and cov2inv = invert_flat cov2 in
-  let cov3inv = Gsl_matrix_flat.copy cov1inv in
-  let _ = Gsl_matrix_flat.add cov3inv cov2inv in
+  let cov3inv = Gsl.Matrix_flat.copy cov1inv in
+  let _ = Gsl.Matrix_flat.add cov3inv cov2inv in
   let cov3 = invert_flat cov3inv
   and y1 = mult_mv_flat ~m:cov1inv ~v:mu1
   and y2 = mult_mv_flat ~m:cov2inv ~v:mu2 in
-  let _ = Gsl_vector_flat.add y1 y2 in
+  let _ = Gsl.Vector_flat.add y1 y2 in
     (mult_mv_flat ~m:cov3 ~v:y1, cov3)
 ;;
 
@@ -528,18 +528,18 @@ let get_m_tmp cov_g_inv cov_b_diag =
 
 (* computes the log of the integral of the product of two gaussians *)
 let get_logz ~mu_b ~mu_g ~cov_b_diag ~cov_g ~log_det_g ~cov_g_inv =
-  let l = float_of_int (Gsl_vector_flat.length mu_b)
-  and m_tmp = get_m_tmp cov_g_inv (Gsl_vector_flat.to_array cov_b_diag) in
+  let l = float_of_int (Gsl.Vector_flat.length mu_b)
+  and m_tmp = get_m_tmp cov_g_inv (Gsl.Vector_flat.to_array cov_b_diag) in
   let det_m_tmp = det_tridiag m_tmp in
   let log_det = (log det_m_tmp) +. log_det_g
   and m_tmp_inv = invert_tridiag m_tmp
-  and mu12 = Gsl_vector_flat.copy mu_g in
-  let _ = Gsl_vector_flat.sub mu12 mu_b
+  and mu12 = Gsl.Vector_flat.copy mu_g in
+  let _ = Gsl.Vector_flat.sub mu12 mu_b
   and m_tmp2_inv = mult_mm_flat ~m1:m_tmp_inv ~m2:(vec2mat_tridiag cov_g_inv) in
   let y = mult_mv_flat ~m:m_tmp2_inv ~v:mu12 in
-  let exparg = Gsl_blas_flat.dot mu12 y in
+  let exparg = Gsl.Blas_flat.dot mu12 y in
 (*    printf "exparg = %.5g, \tlog (2 pi det) = %.5g >> " exparg (l *. (log (2. *. Gsl_math.pi)) +. log_det); *)
-    -. ( exparg +. l *. (log (2. *. Gsl_math.pi)) +. log_det ) /. 2.
+    -. ( exparg +. l *. (log (2. *. Gsl.Math.pi)) +. log_det ) /. 2.
 
 
 
@@ -564,42 +564,42 @@ let get_log_scale_const = Array.fold_left (fun sum n -> sum -. (log ((float_of_i
 
 
 let multivariate_gaussian_logpdf ~mu ~cov x = 
-  let x1 = Gsl_vector_flat.copy x
-  and cov1 = Gsl_matrix_flat.copy cov in
+  let x1 = Gsl.Vector_flat.copy x
+  and cov1 = Gsl.Matrix_flat.copy cov in
   let _ =
-    Gsl_vector_flat.sub x1 mu in
+    Gsl.Vector_flat.sub x1 mu in
   let cov_inv = invert_flat cov1
-  and _ = Gsl_matrix_flat.scale cov1 (2. *. Gsl_math.pi) in
+  and _ = Gsl.Matrix_flat.scale cov1 (2. *. Gsl.Math.pi) in
   let y = mult_mv_flat ~m:cov_inv ~v:x1
-  and coef = Gsl_linalg.det_LU ~protect:true (`MF cov1) in
-  let exparg = Gsl_blas_flat.dot x1 y in
+  and coef = Gsl.Linalg.det_LU ~protect:true (`MF cov1) in
+  let exparg = Gsl.Blas_flat.dot x1 y in
     -. (exparg +. (log coef) ) /. 2.
 
 
 
 (* analogous to multivariate_gaussian_logpdf but when the covariance matrix is diagonal *)
 let multivariate_gaussian_diag_logpdf ~mu ~cov_d x = 
-  let l = float_of_int (Gsl_vector_flat.length mu)
-  and x1 = Gsl_vector_flat.copy x
-  and x2 = Gsl_vector_flat.copy cov_d in
+  let l = float_of_int (Gsl.Vector_flat.length mu)
+  and x1 = Gsl.Vector_flat.copy x
+  and x2 = Gsl.Vector_flat.copy cov_d in
   let _ =
-    Gsl_vector_flat.sub x1 mu;
-    Gsl_vector_flat.mul x2 x1
+    Gsl.Vector_flat.sub x1 mu;
+    Gsl.Vector_flat.mul x2 x1
   in
-  let exparg = Gsl_blas_flat.dot x1 x2 in
-  let logdet = Array.fold_left ( fun sum x -> sum +. (log x) ) 0. (Gsl_vector_flat.to_array cov_d) in
-    -. ( exparg +. l *. (log (2. *. Gsl_math.pi)) +. logdet )  /. 2.
+  let exparg = Gsl.Blas_flat.dot x1 x2 in
+  let logdet = Array.fold_left ( fun sum x -> sum +. (log x) ) 0. (Gsl.Vector_flat.to_array cov_d) in
+    -. ( exparg +. l *. (log (2. *. Gsl.Math.pi)) +. logdet )  /. 2.
 
 
 let gaussian_logpdf ~mu ~sigma x = 
   let exparg =  (x -. mu)**2. /. sigma**2. in
-    -. ( exparg +. (log (2. *. Gsl_math.pi)) +. 2. *. (log sigma ) )  /. 2.
+    -. ( exparg +. (log (2. *. Gsl.Math.pi)) +. 2. *. (log sigma ) )  /. 2.
 
 
 
 
 let binoprod ~bvec ~nvec xvec =
-  let bino i = Gsl_randist.binomial_pdf bvec.(i) ~p:xvec.(i) ~n:nvec.(i) in
+  let bino i = Gsl.Randist.binomial_pdf bvec.(i) ~p:xvec.(i) ~n:nvec.(i) in
   let rec myfun_r acc = function 
 	0 -> acc *. (bino 0)
       | k -> myfun_r (acc *. (bino k)) (k-1)
@@ -690,7 +690,7 @@ let mat_mult a b =
 let get_mean_vec_b ~bvec ~nvec =
   let func b n = (b +. 1.) /. (n +. 2.) in
   let v = Aux.array_map2 func (Array.map float_of_int bvec) (Array.map float_of_int nvec) in
-    Gsl_vector_flat.of_array v
+    Gsl.Vector_flat.of_array v
 ;;
 
 (* this returns the diagonal of the covariance matrix for the gaussian which approximates the product of binomials *)
@@ -699,7 +699,7 @@ let get_cov_mat_b_diag ~bvec ~nvec =
   and bvec_f = Array.map float_of_int bvec
   and nvec_f = Array.map float_of_int nvec in
   let var i = let b = bvec_f.(i) and n = nvec_f.(i) in (b +. 1.) *. (n -. b +. 1.) /. (n +. 2.)**2. /. (n +. 3.) in
-    Gsl_vector_flat.of_array (Array.init len var)
+    Gsl.Vector_flat.of_array (Array.init len var)
 
 
 
@@ -854,7 +854,7 @@ let get_lh_freq ~prior ~l ~prec ~tvec ~nuvec ~s ~alpha =
     and sigmavec = get_sigmavec ~l ~x0:nuvec.(0) ~s tvec in
     let gausspdf i =
       let x = nuvec.(i+1) -. (muvec.(i) nuvec.(i)) in
-	Gsl_randist.gaussian_pdf x ~sigma:( sigmavec.(i) /. (sqrt alpha) ) 
+	Gsl.Randist.gaussian_pdf x ~sigma:( sigmavec.(i) /. (sqrt alpha) )
     in
     let rec myfun_r acc = function 
 	-1 -> acc *. (prior nuvec.(0)) 
@@ -929,7 +929,7 @@ let get_int_lims ~mu ~cov ~stds =
 (* take the internal multidimensional integral by approximating the binomials by gaussians *)
 let get_log_internal_integral ~l ~mu_b ~cov_b_diag ~tvec ~s ~alpha x0 =
   let tvec1 = Array.sub tvec 1 l in
-  let muvec_g = Gsl_vector_flat.of_array (Array.map (get_g ~x0 ~s) tvec1)
+  let muvec_g = Gsl.Vector_flat.of_array (Array.map (get_g ~x0 ~s) tvec1)
   and mvec = get_Mvec ~l ~x0 ~s tvec
   and sigmavec = get_sigmavec ~l ~x0 ~s tvec in
   let (cov_mat_g ,  log_det_g, cov_mat_g_inv) = get_cov_mat_g ~alpha ~sigmavec ~mvec in
@@ -953,10 +953,10 @@ let get_llh ~prior ~l ~tvec ~nvec ~bvec ~prec ~maxiter ~verbose ~s ~alpha =
     flush_all (); *)
   let muvec_b = get_mean_vec_b ~nvec ~bvec
   and cov_mat_b_diag = get_cov_mat_b_diag ~nvec ~bvec in
-  let mu_b_0 = Gsl_vector_flat.get muvec_b 0
-  and sigma_b_0 = Gsl_vector_flat.get cov_mat_b_diag 0
-  and mu_b = Gsl_vector_flat.subvector muvec_b ~off:1 ~len:l
-  and cov_b_diag = Gsl_vector_flat.subvector cov_mat_b_diag ~off:1 ~len:l
+  let mu_b_0 = Gsl.Vector_flat.get muvec_b 0
+  and sigma_b_0 = Gsl.Vector_flat.get cov_mat_b_diag 0
+  and mu_b = Gsl.Vector_flat.subvector muvec_b ~off:1 ~len:l
+  and cov_b_diag = Gsl.Vector_flat.subvector cov_mat_b_diag ~off:1 ~len:l
   and logsc = get_log_scale_const (Array.sub nvec 1 l) in
   let func0 x0 = (gaussian_logpdf ~mu:mu_b_0 ~sigma:sigma_b_0 x0) +. (log (prior x0) ) 
   and func1 x0 = get_log_internal_integral ~l ~mu_b ~cov_b_diag ~tvec ~s ~alpha x0 in
@@ -1029,19 +1029,19 @@ let get_coef_1 ~abserr ~maxiter i n b iffreq =
   and n_f = float_of_int n in
   let nu = b_f /. n_f in
     match iffreq with
-	true ->   nu *. (1. -. nu) *. Gsl_sf.gegenpoly_n i 1.5 (1. -. 2. *. nu)
+	true ->   nu *. (1. -. nu) *. Gsl.Sf.gegenpoly_n i 1.5 (1. -. 2. *. nu)
       | false ->
 	  let mu = (b_f +. 1.) /. (n_f +. 2.)
 	  and sigmasq = (b_f +. 1.) *. (n_f -. b_f +. 1.) /. (n_f +. 2.)**2. /. (n_f +. 3.) 
-	  and f0 x = x *. (1. -. x) *. (Gsl_sf.gegenpoly_n i 1.5 (1. -. 2. *. x)) in
+	  and f0 x = x *. (1. -. x) *. (Gsl.Sf.gegenpoly_n i 1.5 (1. -. 2. *. x)) in
 	    if sqrt sigmasq < 0.5 then
 	      let secderiv = get_second_deriv ~f:f0 ~x:mu ~prec:abserr ~maxiter in
 		(f0 mu) +. sigmasq /. 2. *. secderiv
 	    else
-	      let f x = (Gsl_randist.binomial_pdf b ~p:x ~n) *. (f0 x) in
-	      let ws = Gsl_integration.make_ws 30 in
-	      let res = Gsl_integration.qag f ~a:0. ~b:1. ~epsabs:abserr ~epsrel:def_relerr ~limit:30 Gsl_integration.GAUSS31 ws in
-		res.Gsl_fun.res
+	      let f x = (Gsl.Randist.binomial_pdf b ~p:x ~n) *. (f0 x) in
+	      let ws = Gsl.Integration.make_ws 30 in
+	      let res = Gsl.Integration.qag f ~a:0. ~b:1. ~epsabs:abserr ~epsrel:def_relerr ~limit:30 Gsl.Integration.GAUSS31 ws in
+		res.Gsl.Fun.res
 
 
 (*
@@ -1065,19 +1065,19 @@ let get_coef_l ~abserr ~maxiter i n b iffreq =
   and n_f = float_of_int n in
   let nu = b_f /. n_f in
     match iffreq with
-	true -> Gsl_sf.gegenpoly_n i 1.5 (1. -. 2. *. nu)
+	true -> Gsl.Sf.gegenpoly_n i 1.5 (1. -. 2. *. nu)
       | false ->
 	  let mu = (b_f +. 1.) /. (n_f +. 2.)
 	  and sigmasq = (b_f +. 1.) *. (n_f -. b_f +. 1.) /. (n_f +. 2.)**2. /. (n_f +. 3.) 
-	  and f0 x = Gsl_sf.gegenpoly_n i 1.5 (1. -. 2. *. x) in
+	  and f0 x = Gsl.Sf.gegenpoly_n i 1.5 (1. -. 2. *. x) in
 	    if sqrt sigmasq < 0.5 then
 	      let secderiv = get_second_deriv ~f:f0 ~x:mu ~prec:abserr ~maxiter in
 		(f0 mu) +. sigmasq /. 2. *. secderiv
 	    else
-	      let f x = (Gsl_randist.binomial_pdf b ~p:x ~n) *. (f0 x) in
-	      let ws = Gsl_integration.make_ws 30 in
-	      let res = Gsl_integration.qag f ~a:0. ~b:1. ~epsabs:abserr ~epsrel:def_relerr ~limit:30 Gsl_integration.GAUSS31 ws in
-		res.Gsl_fun.res
+	      let f x = (Gsl.Randist.binomial_pdf b ~p:x ~n) *. (f0 x) in
+	      let ws = Gsl.Integration.make_ws 30 in
+	      let res = Gsl.Integration.qag f ~a:0. ~b:1. ~epsabs:abserr ~epsrel:def_relerr ~limit:30 Gsl.Integration.GAUSS31 ws in
+		res.Gsl.Fun.res
 
 
 
@@ -1099,19 +1099,19 @@ let get_coef ~abserr ~maxiter i j n b iffreq =
   and n_f = float_of_int n in
   let nu = b_f /. n_f in
     match iffreq with
-	true -> nu *. (1. -. nu) *. (Gsl_sf.gegenpoly_n i 1.5 (1. -. 2. *. nu)) *. (Gsl_sf.gegenpoly_n j 1.5 (1. -. 2. *. nu))
+	true -> nu *. (1. -. nu) *. (Gsl.Sf.gegenpoly_n i 1.5 (1. -. 2. *. nu)) *. (Gsl.Sf.gegenpoly_n j 1.5 (1. -. 2. *. nu))
       | false ->
 	  let mu = (b_f +. 1.) /. (n_f +. 2.)
 	  and sigmasq = (b_f +. 1.) *. (n_f -. b_f +. 1.) /. (n_f +. 2.)**2. /. (n_f +. 3.) 
-	  and f0 x = x *. (1. -. x) *. (Gsl_sf.gegenpoly_n i 1.5 (1. -. 2. *. x)) *. (Gsl_sf.gegenpoly_n j 1.5 (1. -. 2. *. x)) in
+	  and f0 x = x *. (1. -. x) *. (Gsl.Sf.gegenpoly_n i 1.5 (1. -. 2. *. x)) *. (Gsl.Sf.gegenpoly_n j 1.5 (1. -. 2. *. x)) in
 	    if sqrt sigmasq < 0.5 then
 	      let secderiv = get_second_deriv ~f:f0 ~x:mu ~prec:abserr ~maxiter in
 		(f0 mu) +. sigmasq /. 2. *. secderiv
 	    else
-	      let f x = (Gsl_randist.binomial_pdf b ~p:x ~n) *. (f0 x) in
-	      let ws = Gsl_integration.make_ws 30 in
-	      let res = Gsl_integration.qag f ~a:0. ~b:1. ~epsabs:abserr ~epsrel:def_relerr ~limit:30 Gsl_integration.GAUSS31 ws in
-		res.Gsl_fun.res
+	      let f x = (Gsl.Randist.binomial_pdf b ~p:x ~n) *. (f0 x) in
+	      let ws = Gsl.Integration.make_ws 30 in
+	      let res = Gsl.Integration.qag f ~a:0. ~b:1. ~epsabs:abserr ~epsrel:def_relerr ~limit:30 Gsl.Integration.GAUSS31 ws in
+		res.Gsl.Fun.res
 
  
 
@@ -1371,7 +1371,7 @@ let read_plot_file filename =
 	0 -> arrl
       | 2 ->
 	  let arr = Array.of_list (List.map float_of_string l) in
-	  let vec = Gsl_vector.of_array arr in
+	  let vec = Gsl.Vector.of_array arr in
 	    vec::arrl
       | _ -> raise (Bad_file (Printf.sprintf "file %s has %d entries in each line instead of 2" filename (List.length l)) )
   in
@@ -1500,8 +1500,8 @@ let parse_params (start_vec, step_vec, maxiter, maxterms, prec, func_eval, stds,
 
 
 let get_options options = 
-  let start_vec = Gsl_vector.of_array [|nan; -.1.|]
-  and step_vec = Gsl_vector.of_array [|nan; -.1.|]
+  let start_vec = Gsl.Vector.of_array [|nan; -.1.|]
+  and step_vec = Gsl.Vector.of_array [|nan; -.1.|]
   and maxiter = ref def_maxiter
   and maxterms = ref def_maxterms
   and prec = ref def_prec
@@ -1578,7 +1578,7 @@ let get_ml_s_0 ~maxiter ~prec ~verbose (mylf_0, mylf_k) alpha_guess =
 	      (interval, mylf_k)
 	  with
 	      Minimizer_failed (code, xbad, fbad) ->
-		let y = Gsl_vector.of_array [|0.; xbad.{0}|] in raise (Minimizer_failed (Small, y, fbad))		
+		let y = Gsl.Vector.of_array [|0.; xbad.{0}|] in raise (Minimizer_failed (Small, y, fbad))
   in
   let _ = if verbose then print_endline (Printf.sprintf "Interval containing the ML value: (%.3e, %.3e), guess = %.3e\n" alpha1 alpha2 alpha0) in
     if alpha0 = infinity then
@@ -1657,8 +1657,8 @@ let get_start_vec start_vec step_vec ~tvec ~bvec ~nvec =
   let nuvec = Aux.array_map2 ( /. ) bvec_f nvec_f in
   let s_guess = get_rough_s_guess ~l ~tvec ~nuvec in
   let alpha_guess = get_rough_alpha_guess ~l ~tvec ~bvec ~nvec ~s:s_guess in
-  let new_start_vec = Gsl_vector.copy start_vec 
-  and new_step_vec = Gsl_vector.copy step_vec in
+  let new_start_vec = Gsl.Vector.copy start_vec
+  and new_step_vec = Gsl.Vector.copy step_vec in
 (*    print_endline (Printf.sprintf "yyy%.5f\t%.5f\n" start_vec.{0} start_vec.{1}); *)
     if start_vec.{1} = -.1.
     then
@@ -1725,7 +1725,7 @@ let main () =
     and bvec_f = Array.map float_of_int bvec in
     let nuvec = Aux.array_map2 ( /. ) bvec_f nvec_f *)
     and prior x = 1.
-    and rng = Gsl_rng.make (Gsl_rng.default ()) in
+    and rng = Gsl.Rng.make (Gsl.Rng.default ()) in
     let mylf ~x = likelihood_approx ~iffreq ~prior ~l ~nvec ~bvec ~tvec ~prec ~maxiter ~verbose ~s:x.{0} ~alpha:x.{1}
     and mylf_inf x = likelihood_approx ~iffreq ~prior ~l ~nvec ~bvec ~tvec ~prec ~maxiter ~verbose ~s:x ~alpha:infinity
     and mylf_0 x = likelihood_approx ~iffreq ~prior ~l ~nvec ~bvec ~tvec ~prec ~maxiter ~verbose ~s:0. ~alpha:x
@@ -1794,12 +1794,12 @@ let main () =
 	print_endline (Printf.sprintf "Bad input line! %s" s); exit 1;
     | Bad_file s -> print_endline (Printf.sprintf "Bad file format : %s" s); exit 1;
     | Failure s -> print_endline (Printf.sprintf "Failure : %s" s); exit 1;
-    | Gsl_error.Gsl_exn (errno, s) -> print_endline (Printf.sprintf "Gsl error %s : %s" (Gsl_error.string_of_errno errno) s); exit 1;
+    | Gsl.Error.Gsl_exn (errno, s) -> print_endline (Printf.sprintf "Gsl error %s : %s" (Gsl.Error.string_of_errno errno) s); exit 1;
 ;;
 
 
 
-Gsl_error.init ();;
+Gsl.Error.init ();;
 main ();;
 
 
