@@ -8,7 +8,7 @@ CKEYS = -o
 LIBKEYS = -c
 DOCKEYS = -html -colorize-code -d
 
-GSLDIR = -I /usr/local/lib/ocaml/ocamlgsl/
+GSLDIR = -I ~/.opam/system/lib/gsl/
 GSLO = bigarray.cmxa gsl.cmxa
 GSLC = bigarray.cma gsl.cma
 
