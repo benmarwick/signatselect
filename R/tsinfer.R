@@ -85,10 +85,10 @@ function(tvec, bvec, nvec,
 
   # Fix the inital frequncy if iffixedf0 == TRUE
   if (iffixedf0) {
-    lowervec[3] <- f0guess
-    uppervec[3] <- f0guess
-    lowervec2[3] <- f0guess
-    uppervec2[3] <- f0guess
+    lowervec[3] <- f0_guess
+    uppervec[3] <- f0_guess
+    lowervec2[3] <- f0_guess
+    uppervec2[3] <- f0_guess
   }
 
   if (!ifneut) {
