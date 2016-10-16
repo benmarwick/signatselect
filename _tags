@@ -1,2 +1,0 @@
-<tsinfer.*>: package(gsl), package(str), package(num)
-<io.*>: package(str)

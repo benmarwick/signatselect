@@ -1,0 +1,11 @@
+Package: tsinfer
+Type: Package
+Title: TSINFER
+Version: 0.9
+Date: 2016-10-16
+Author: Hezekiah Akiva Bacovcin
+Maintainer: Hezekiah Akiva Bacovcin <hbacovci@gmail.com>
+Description: Infer population size and selection coefficient from time-series
+    allele-frequency data. Recoded from OCAML tsinfer.
+License: MIT License
+RoxygenNote: 5.0.1
