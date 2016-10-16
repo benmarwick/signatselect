@@ -43,7 +43,7 @@ function(tvec, bvec, nvec,
     return(ll)
   }
   # Initialise output
-  output <- list(s.0 = 0, alpha.0=NA, f0.0 = NA, LL.0=NA, s=NA,alpha=NA,f0=NA,LL-NA)
+  output <- list(s.0 = 0, alpha.0=NA, f0.0 = NA, LL.0=NA, s=NA,alpha=NA,f0=NA,LL=NA)
   # Convert bvec and nvec into vector of sample frequencies
   nuvec <- bvec / nvec
   
