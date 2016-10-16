@@ -1,5 +1,5 @@
 get_rough_alpha_guess <-
-function(lgth, nvec, bvec, tvec, s){
+function(lgth, nvec, bvec, tvec, s, minalpha, maxalpha){
   # Create a vector of frequencies for each time point
   nuvec <- bvec/nvec
   # Initial x is different depending on the selection coefficient
@@ -27,9 +27,9 @@ function(lgth, nvec, bvec, tvec, s){
   cnt <- tmpval[[2]]
   # If the sum is 0 return half of the maximum population size
   if (sum_inv_n == 0) {
-    return(def_maxalpha/2)
+    return(maxalpha/2)
   # Otherwise return the larger of 2 times the minimum size or the count divided by the sum of the estimates
   } else {
-    return(max(def_minalpha * 2, cnt/sum_inv_n))
+    return(max(minalpha * 2, cnt/sum_inv_n))
   }
 }

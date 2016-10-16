@@ -69,7 +69,7 @@ function(tvec, bvec, nvec,
   s_guess <- max(c(mins,get_rough_s_guess(l, tvec, nuvec, prec)))
  
   # Calculate an initial guess for alpha
-    alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
+    alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess, minalpha, maxalpha))))
 
   # Set initial probability equal to initial frequency
   f0_guess <- nuvec[1]
@@ -106,7 +106,7 @@ function(tvec, bvec, nvec,
   s_guess<-0
    
   # Generate guess of alpha using s=0
-  alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
+  alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess,minalpha, maxalpha))))
    
   # Use bounds to force s to be 0
   lowervec[1] <- 0
