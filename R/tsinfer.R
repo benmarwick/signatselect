@@ -67,7 +67,10 @@ function(tvec, bvec, nvec,
   
   # Calculate an initial guess for s
   s_guess <- max(c(mins,get_rough_s_guess(l, tvec, nuvec, prec)))
-  
+ 
+  # Calculate an initial guess for alpha
+    alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
+
   # Set initial probability equal to initial frequency
   f0_guess <- nuvec[1]
   
@@ -89,7 +92,6 @@ function(tvec, bvec, nvec,
   }
 
   if (!ifneut) {
-    alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
     res1 <- nloptr(c(s_guess,alpha_guess,f0_guess),my_likelihood,lb=lowervec,ub=uppervec,
                      opts=list(algorithm="NLOPT_GN_MLSL_LDS",local_opts=list(algorithm='NLOPT_LN_SBPLX'),xtol_rel=.1,maxeval=500))
      # Use a local optimisation method to refine results from global search
