@@ -12,7 +12,7 @@ An R package implementation of code to infer population size and selection coeff
  In R:
 
  install.package('devtools')
- install_github('bacovcin/tsinfer-R')
+ install_github('bacovcin/tsinfer-R',quick=T)
 
 ## Execution
  Use the tsinfer function.
