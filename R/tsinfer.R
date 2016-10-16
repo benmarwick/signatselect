@@ -11,6 +11,12 @@
 #' @param ifneut whether to compute only the neutral model (default=FALSE)
 #' @param iffixedf0 whether to use the initial sample frequency as the initial frequency of the logistic component of the model (default=FALSE)
 #' @param verbose whether to print intermediate output (detault=FALSE)
+#' @param mins minimum s value to consider (default=-2)
+#' @param mins maximum s value to consider (default=2)
+#' @param minalpha minimum alpha value to consider (default=10)
+#' @param minalpha maximum alpha value to consider (default=1e8)
+#' @param minf0 minimum f0 value to consider in log-odds (default=-10)
+#' @param maxf0 maximum f0 value to consider in log-odds (default=10)
 #' @return A list with the neutral and non-neutral parameter values and associated log-likelihoods
 #' @export
 tsinfer <-
@@ -20,7 +26,13 @@ function(tvec, bvec, nvec,
                     iffreq=FALSE,
                     ifneut=FALSE,
 		    iffixedf0=FALSE,
-                    verbose=FALSE) {
+                    verbose=FALSE,
+		    mins=-2,
+		    maxs=2,
+		    minalpha=10,
+		    maxalpha=1e8,
+		    minf0=-10,
+		    maxf0=10) {
   my_likelihood <- function(x) {
     # Likelihood function
     
@@ -54,7 +66,7 @@ function(tvec, bvec, nvec,
   l <- length(nuvec)
   
   # Calculate an initial guess for s
-  s_guess <- max(c(def_mins,get_rough_s_guess(l, tvec, nuvec)))
+  s_guess <- max(c(mins,get_rough_s_guess(l, tvec, nuvec)))
   
   # Set initial probability equal to initial frequency
   f0_guess <- nuvec[1]
@@ -63,10 +75,10 @@ function(tvec, bvec, nvec,
   f0_guess <- log(f0_guess/(1-f0_guess))
 
   # Create bounds for optimisation
-  lowervec <- c(max(def_mins,s_guess-.5),max(log(def_minalpha),alpha_guess/2),-10)
-  uppervec <- c(min(def_maxs,s_guess+.5),min(log(def_maxalpha),alpha_guess*2),10)
-  lowervec2 <- c(def_mins,log(def_minalpha),-10)
-  uppervec2 <- c(def_maxs,log(def_maxalpha),10)
+  lowervec <- c(max(mins,s_guess-.5),max(log(minalpha),alpha_guess/2),minf0)
+  uppervec <- c(min(maxs,s_guess+.5),min(log(maxalpha),alpha_guess*2),maxf0)
+  lowervec2 <- c(mins,log(minalpha),minf0)
+  uppervec2 <- c(maxs,log(maxalpha),maxf0)
 
   # Fix the inital frequncy if iffixedf0 == TRUE
   if (iffixedf0) {
@@ -77,7 +89,7 @@ function(tvec, bvec, nvec,
   }
 
   if (!ifneut) {
-    alpha_guess <- log(max(c(def_minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
+    alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
     res1 <- nloptr(c(s_guess,alpha_guess,f0_guess),my_likelihood,lb=lowervec,ub=uppervec,
                      opts=list(algorithm="NLOPT_GN_MLSL_LDS",local_opts=list(algorithm='NLOPT_LN_SBPLX'),xtol_rel=.1,maxeval=500))
      # Use a local optimisation method to refine results from global search
@@ -92,7 +104,7 @@ function(tvec, bvec, nvec,
   s_guess<-0
    
   # Generate guess of alpha using s=0
-  alpha_guess <- log(max(c(def_minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
+  alpha_guess <- log(max(c(minalpha,get_rough_alpha_guess(l, nvec, bvec, tvec,s=s_guess))))
    
   # Use bounds to force s to be 0
   lowervec[1] <- 0

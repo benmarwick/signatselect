@@ -5,7 +5,8 @@
 \title{Infer selection/drift parameters for time-series allele-frequency data}
 \usage{
 tsinfer(tvec, bvec, nvec, maxiter = 200, prec = 1e-06, iffreq = FALSE,
-  ifneut = FALSE, iffixedf0 = FALSE, verbose = FALSE)
+  ifneut = FALSE, iffixedf0 = FALSE, verbose = FALSE, mins = -2,
+  maxs = 2, minalpha = 10, maxalpha = 1e+08, minf0 = -10, maxf0 = 10)
 }
 \arguments{
 \item{tvec}{Time coordinates for the time-series (start with 0)}
@@ -25,6 +26,18 @@ tsinfer(tvec, bvec, nvec, maxiter = 200, prec = 1e-06, iffreq = FALSE,
 \item{iffixedf0}{whether to use the initial sample frequency as the initial frequency of the logistic component of the model (default=FALSE)}
 
 \item{verbose}{whether to print intermediate output (detault=FALSE)}
+
+\item{mins}{minimum s value to consider (default=-2)}
+
+\item{minalpha}{minimum alpha value to consider (default=10)}
+
+\item{minf0}{minimum f0 value to consider in log-odds (default=-10)}
+
+\item{maxf0}{maximum f0 value to consider in log-odds (default=10)}
+
+\item{mins}{maximum s value to consider (default=2)}
+
+\item{minalpha}{maximum alpha value to consider (default=1e8)}
 }
 \value{
 A list with the neutral and non-neutral parameter values and associated log-likelihoods
