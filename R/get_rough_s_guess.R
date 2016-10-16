@@ -1,5 +1,5 @@
 get_rough_s_guess <-
-function(lgth, tvec, nuvec) {
+function(lgth, tvec, nuvec, prec) {
   # Get a vector of the time distance between each adjacent pair of points
   dt_vec <- tvec[-1]-tvec[-length(tvec)]
   # Get a vector of the change in frequency between each adjacent pair of points
@@ -28,7 +28,7 @@ function(lgth, tvec, nuvec) {
   # s_guess equals the average s estimate
   s_guess <- sum_s/cnt
   # If s_guess is smaller than the precision, just return 0
-  if (abs(s_guess) <= def_prec) {
+  if (abs(s_guess) <= prec) {
     return(0)
   } else {
     return(s_guess)

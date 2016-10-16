@@ -66,7 +66,7 @@ function(tvec, bvec, nvec,
   l <- length(nuvec)
   
   # Calculate an initial guess for s
-  s_guess <- max(c(mins,get_rough_s_guess(l, tvec, nuvec)))
+  s_guess <- max(c(mins,get_rough_s_guess(l, tvec, nuvec, prec)))
   
   # Set initial probability equal to initial frequency
   f0_guess <- nuvec[1]
