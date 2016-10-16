@@ -114,6 +114,11 @@ function(tvec, bvec, nvec,
   lowervec2[1] <- 0
   uppervec2[1] <- 0
 
+  # f0 and alpha cannot both be estimated for neutral models; so fix f0
+  lowervec[3] <- f0_guess 
+  uppervec[3] <- f0_guess
+  lowervec2[3] <- f0_guess
+  uppervec2[3] <- f0_guess
   # Initial optimisation does global search of narrow bounds around initial guesses to try and
   # escape local optima
   res1 <- nloptr(c(s_guess,alpha_guess,f0_guess),my_likelihood,lb=lowervec,ub=uppervec,
