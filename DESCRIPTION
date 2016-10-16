@@ -7,7 +7,6 @@ Author: Hezekiah Akiva Bacovcin
 Maintainer: Hezekiah Akiva Bacovcin <hbacovci@gmail.com>
 Description: Infer population size and selection coefficient from time-series
     allele-frequency data. Recoded from OCAML tsinfer.
-Depends: nloptr,
-limSolve
+Depends: nloptr, limSolve
 License: MIT License
 RoxygenNote: 5.0.1
