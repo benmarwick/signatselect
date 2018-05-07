@@ -7,7 +7,7 @@
 #' @param nvec Total number of samples per time point
 #' @param maxiter Maximum number of iterations
 #' @param prec Precision for optimisation
-#' @param iffreq whether to assume that the sample frequencies are the population frequncies (default=FALSE)
+#' @param iffreq whether to assume that the sample frequencies are the population frequencies (default=FALSE)
 #' @param ifneut whether to compute only the neutral model (default=FALSE)
 #' @param iffixedf0 whether to use the initial sample frequency as the initial frequency of the logistic component of the model (default=FALSE)
 #' @param verbose whether to print intermediate output (detault=FALSE)
