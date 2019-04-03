@@ -40,14 +40,12 @@ Let's take a look:
   plot(time, freq, type = 'b')
 ```
 
-<img src="man/figures/README-fit-plot-1.png" width="100%" />
+<img src="man/figures/README-fit-plot-1.png" width="50%" />
 
 There's a trend of increasing frequencies, but is it a result of selection? Let's see:
 
 ``` r
 library(signatselect)
-#> Loading required package: nloptr
-#> Loading required package: limSolve
 
     fit(
       time = time,
@@ -81,6 +79,32 @@ Now we compute the test result:
     nvec = nvec,
     verbose = FALSE
   )
+
+# and take a look at the result 
+tsinfer_output
+#> $s.0
+#> [1] 0
+#> 
+#> $alpha.0
+#> [1] 80.02608
+#> 
+#> $f0.0
+#> [1] 0.2
+#> 
+#> $LL.0
+#> [1] 18.04008
+#> 
+#> $s
+#> [1] 0.08925489
+#> 
+#> $alpha
+#> [1] 16436.47
+#> 
+#> $f0
+#> [1] 0.3659511
+#> 
+#> $LL
+#> [1] 13.408
 ```
 
 The selection coefficient for non-neutral model is in `s`, and so the value here is 0.0892549. The population size for non-neutral model is in `alpha`, and here is 1.643647410^{4}
@@ -126,7 +150,7 @@ ggplot(ceramics_lbk_merzbach_long,
   geom_point() +
   facet_wrap(~variable,
              scales = "free_y") +
-  theme_minimal()
+  theme_minimal(base_size = 8)
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
@@ -203,7 +227,7 @@ ggplot(ceramics_lbk_merzbach_long_sig,
   geom_line() +
   facet_wrap(~variable,
              scales = "free_y") +
-  theme_minimal()
+  theme_minimal(base_size = 8)
 ```
 
 <img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
@@ -303,7 +327,7 @@ ggplot()  +
                 colour = sig,
                 shape = sig))  +
   facet_wrap( ~ type, scales = "free_y") +
-  theme_minimal()
+  theme_minimal(base_size = 8)
 #> geom_path: Each group consists of only one observation. Do you need to
 #> adjust the group aesthetic?
 #> geom_path: Each group consists of only one observation. Do you need to

@@ -10,6 +10,7 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
+  fig.retina = 2,
   out.width = "100%"
 )
 ```
@@ -47,7 +48,7 @@ Here is an example of the `fit()`, the frequency increment test:
 
 Let's take a look:
 
-```{r fit-plot}
+```{r fit-plot, out.width="50%"}
   plot(time, freq, type = 'b')
 ```
 
@@ -87,6 +88,9 @@ Now we compute the test result:
     nvec = nvec,
     verbose = FALSE
   )
+
+# and take a look at the result 
+tsinfer_output
 ```
 
 The selection coefficient for non-neutral model is in `s`, and so the value here is `r tsinfer_output$s`. The population size for non-neutral model is in `alpha`, and here is `r tsinfer_output$alpha`
@@ -131,7 +135,7 @@ ggplot(ceramics_lbk_merzbach_long,
   geom_point() +
   facet_wrap(~variable,
              scales = "free_y") +
-  theme_minimal()
+  theme_minimal(base_size = 8)
 ```
 
 To prepare the data for the FIT we need to reshape it to a long form, compute frequency as ratio of count of type of a interest to all other types, and drop decoration types with less than threee time points (we need a min of three time points to compute the FIT).
@@ -206,7 +210,7 @@ ggplot(ceramics_lbk_merzbach_long_sig,
   geom_line() +
   facet_wrap(~variable,
              scales = "free_y") +
-  theme_minimal()
+  theme_minimal(base_size = 8)
 ```
 
 We can subset each time series to see if we can identify episodes of selection among decoration types that might not show overall selection. First we need a function to isolate a data frame of rolling groups of three time points:
@@ -303,7 +307,7 @@ ggplot()  +
                 colour = sig,
                 shape = sig))  +
   facet_wrap( ~ type, scales = "free_y") +
-  theme_minimal()
+  theme_minimal(base_size = 8)
 ```
 
 
