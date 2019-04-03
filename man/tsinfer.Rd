@@ -29,15 +29,15 @@ tsinfer(tvec, bvec, nvec, maxiter = 200, prec = 1e-06, iffreq = FALSE,
 
 \item{mins}{minimum s value to consider (default=-2)}
 
+\item{maxs}{maximum s value to consider (default=2)}
+
 \item{minalpha}{minimum alpha value to consider (default=10)}
+
+\item{maxalpha}{maximum alpha value to consider (default=1e8)}
 
 \item{minf0}{minimum f0 value to consider in log-odds (default=-10)}
 
 \item{maxf0}{maximum f0 value to consider in log-odds (default=10)}
-
-\item{mins}{maximum s value to consider (default=2)}
-
-\item{minalpha}{maximum alpha value to consider (default=1e8)}
 }
 \value{
 A list with the neutral and non-neutral parameter values and associated log-likelihoods
@@ -52,5 +52,8 @@ f0.0 = initial frequency for the logistic in neutral model
 LL.0 = log-likelihood of neutral model
 }
 \description{
-\code{tsinfer} computes the selection coefficient, population size and initial frequency for the logistic using a Gaussian approximation of the Kimura expression for time-series allele-frequency data.
+\code{tsinfer} computes the selection coefficient, population size and initial frequency for the logistic using a Gaussian approximation of the Kimura expression for time-series variant-frequency data.
+}
+\details{
+Essential arguments are tvec (time point labels for time series starting at 0), bvec (number of new variants at each time point), and nvec (total number of samples at each time point).
 }

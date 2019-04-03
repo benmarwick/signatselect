@@ -1,3 +1,5 @@
+#' @importFrom stats dnorm optimize t.test
+#' 
 eval_laplace <-
 function(f, a, b, prec, maxiter, verbose) {
   # Use the negative of the function for minimisation

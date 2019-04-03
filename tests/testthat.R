@@ -1,4 +1,4 @@
 library(testthat)
-library(tsinferr)
+library(signatselect)
 
-test_check("tsinferr")
+test_check("signatselect")

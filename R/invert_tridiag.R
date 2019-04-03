@@ -1,3 +1,4 @@
+#' @importFrom limSolve Solve.tridiag
 invert_tridiag <-
 function(diag,abovediag,belowdiag){
   n <- length(diag)

@@ -14,9 +14,9 @@
 #' @param iffixedf0 whether to use the initial sample frequency as the initial frequency of the logistic component of the model (default=FALSE)
 #' @param verbose whether to print intermediate output (detault=FALSE)
 #' @param mins minimum s value to consider (default=-2)
-#' @param mins maximum s value to consider (default=2)
+#' @param maxs maximum s value to consider (default=2)
 #' @param minalpha minimum alpha value to consider (default=10)
-#' @param minalpha maximum alpha value to consider (default=1e8)
+#' @param maxalpha maximum alpha value to consider (default=1e8)
 #' @param minf0 minimum f0 value to consider in log-odds (default=-10)
 #' @param maxf0 maximum f0 value to consider in log-odds (default=10)
 #' @return A list with the neutral and non-neutral parameter values and associated log-likelihoods
@@ -55,11 +55,11 @@ tsinfer <- function (tvec,
       return(-Inf)
     }
     else if (iffreq) {
-      try(ll <- -signatselect:::get_llh_freq(prior, l, prec, tvec, nuvec,
+      try(ll <- -get_llh_freq(prior, l, prec, tvec, nuvec,
                                         s, alpha, f0))
     }
     else {
-      try(ll <- -signatselect:::get_llh(prior,
+      try(ll <- -get_llh(prior,
                                    l,
                                    tvec,
                                    nvec,
@@ -88,11 +88,11 @@ tsinfer <- function (tvec,
     return(1)
   }
   l <- length(nuvec)
-  s_guess <- max(c(mins, signatselect:::get_rough_s_guess(l, tvec, nuvec,
+  s_guess <- max(c(mins, get_rough_s_guess(l, tvec, nuvec,
                                                      prec)))
   alpha_guess <- log(max(c(
     minalpha,
-    signatselect:::get_rough_alpha_guess(l,
+    get_rough_alpha_guess(l,
                                     nvec, bvec, tvec, s = s_guess, minalpha, maxalpha)
   )))
   f0_guess <- nuvec[1]
@@ -141,7 +141,7 @@ tsinfer <- function (tvec,
   s_guess <- 0
   alpha_guess <- log(max(c(
     minalpha,
-    signatselect:::get_rough_alpha_guess(l,
+    get_rough_alpha_guess(l,
                                     nvec, bvec, tvec, s = s_guess, minalpha, maxalpha)
   )))
   lowervec[1] <- 0

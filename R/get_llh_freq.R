@@ -28,7 +28,7 @@ function(prior, lgth, prec, tvec, nuvec, s, alpha, f0) {
     }
     
     # Return different log-likelihoods depending on how similar the predicted and actual frequencies are
-    if (Reduce2(gfun, gvec, nuvec, true) && (prior(f0) > 0)) {
+    if (Reduce2(gfun, gvec, nuvec, TRUE) && (prior(f0) > 0)) {
       return(Inf)
     } else {
       return(-Inf)
