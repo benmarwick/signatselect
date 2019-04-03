@@ -35,4 +35,3 @@ A log-likelihood estimate.
 \description{
 \code{get_llh} uses Laplace approximation to compute the log-likelihood of the gaussian approximation assuming the data is drawn from a series of binomial choices.
 }
-

@@ -19,7 +19,7 @@ tsinfer(tvec, bvec, nvec, maxiter = 200, prec = 1e-06, iffreq = FALSE,
 
 \item{prec}{Precision for optimisation}
 
-\item{iffreq}{whether to assume that the sample frequencies are the population frequncies (default=FALSE)}
+\item{iffreq}{whether to assume that the sample frequencies are the population frequencies (default=FALSE)}
 
 \item{ifneut}{whether to compute only the neutral model (default=FALSE)}
 
@@ -41,8 +41,16 @@ tsinfer(tvec, bvec, nvec, maxiter = 200, prec = 1e-06, iffreq = FALSE,
 }
 \value{
 A list with the neutral and non-neutral parameter values and associated log-likelihoods
+The output of the execution is the following list:
+s = selection coefficient for non-neutral model
+alpha = population size for non-neutral model
+f0 = initial frequency for the logistic in non-neutral model
+LL = log-likelihood of non-neutral model
+s.0 = 0 (selection coefficient for the neutral model)
+alpha.0 = population size for the neutral model
+f0.0 = initial frequency for the logistic in neutral model
+LL.0 = log-likelihood of neutral model
 }
 \description{
 \code{tsinfer} computes the selection coefficient, population size and initial frequency for the logistic using a Gaussian approximation of the Kimura expression for time-series allele-frequency data.
 }
-

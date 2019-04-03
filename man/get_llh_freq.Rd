@@ -29,4 +29,3 @@ A log-likelihood estimate.
 \description{
 \code{get_llh_freq} computes the Gaussian approximation assuming that the actual frequencies are the sampled frequencies
 }
-

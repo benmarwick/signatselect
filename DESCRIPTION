@@ -1,12 +1,15 @@
-Package: tsinfer
+Package: signatselect
 Type: Package
-Title: TSINFER
-Version: 0.9
-Date: 2016-10-16
+Title: signatselect: Identifying signatures of selection
+Version: 1.0
+Date: 2019-04-29
 Author: Hezekiah Akiva Bacovcin
-Maintainer: Hezekiah Akiva Bacovcin <hbacovci@gmail.com>
+Maintainer: Ben Marwick <benmarwick@gmail.com>
 Description: Infer population size and selection coefficient from time-series
     allele-frequency data. Recoded from OCAML tsinfer.
-Depends: nloptr, limSolve
+Depends: nloptr, 
+         limSolve
 License: MIT License
-RoxygenNote: 5.0.1
+RoxygenNote: 6.0.1.9000
+Suggests: 
+    testthat

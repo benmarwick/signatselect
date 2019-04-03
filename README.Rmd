@@ -1,16 +1,28 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-signatselect: Identifying signatures of selection [![Travis build status](https://travis-ci.org/benmarwick/signatselect.svg?branch=master)](https://travis-ci.org/benmarwick/signatselect)
-==========================================================================================================================================================================================
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+# signatselect: Identifying signatures of selection  [![Travis build status](https://travis-ci.org/benmarwick/signatselect.svg?branch=master)](https://travis-ci.org/benmarwick/signatselect)
 
 The goal of signatselect is to provide two core functions useful for investigating change over time in artefact assemblages (and genetic time-series data):
 
--   `fit()` the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. This is adapted directly from Feder, A. F., Kryazhimskiy, S., & Plotkin, J. B. (2014). Identifying signatures of selection in genetic time series. *Genetics*, 196(2), 509-522. <https://doi.org/10.1534/genetics.113.158220>.
+- `fit()` the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. This is adapted directly from Feder, A. F., Kryazhimskiy, S., & Plotkin, J. B. (2014). Identifying signatures of selection in genetic time series. _Genetics_, 196(2), 509-522. <https://doi.org/10.1534/genetics.113.158220>.
 
--   `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from <https://github.com/bacovcin/tsinfer-R>
+- `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from <https://github.com/bacovcin/tsinfer-R> 
 
-Installation
-------------
+
+## Installation
 
 You can install the development version of signatselect from GitHub with:
 
@@ -19,14 +31,13 @@ You can install the development version of signatselect from GitHub with:
 pak::pkg_install("benmarwick/signatselect")
 ```
 
-Examples
---------
+## Examples
 
 ### The Frequency Increment Test
 
 Here is an example of the `fit()`, the frequency increment test:
 
-``` r
+```{r fit-example}
   # data slightly modified from Feder et al. Table 2 
   time <- c(415 , 505 , 585 , 665 , 745 , 825 , 910)
   freq <- c(0.06956522, 0.23125000, 0.62352941, 0.78494624, 0.93333333, 0.97979798, 0.98979592)
@@ -34,34 +45,29 @@ Here is an example of the `fit()`, the frequency increment test:
 
 Let's take a look:
 
-``` r
+```{r fit-plot}
   plot(time, freq, type = 'b')
 ```
 
-<img src="man/figures/README-fit-plot-1.png" width="100%" />
-
 There's a trend of increasing frequencies, but is it a result of selection? Let's see:
 
-``` r
+```{r fit-test}
 library(signatselect)
-#> Loading required package: nloptr
-#> Loading required package: limSolve
 
     fit(
       time = time,
       v = freq
     )
-#>   fit_stat      fit_p
-#> 1 3.262457 0.02238466
 ```
 
 The result of the FIT, with the low p-value, indicates that selection is occuring in this time series.
 
 ### Infer population size and selection coefficient from time-series variant-frequency data
 
-Here is an example of `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. Here's some sample data: `tvec` contains sample times, `bvec` contains the number of samples of the focal variant (must be integers) and `nvec` containes total number of samples at each time point (must be integers).
+Here is an example of `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. Here's some sample data:
+`tvec` contains sample times, `bvec` contains the number of samples of the focal variant (must be integers) and `nvec` containes total number of samples at each time point (must be integers). 
 
-``` r
+```{r}
   library(signatselect)
   # adapted from https://github.com/skryazhi/tsinfer
   tvec = c(0, 10, 20)
@@ -70,8 +76,8 @@ Here is an example of `tsinfer()` to estimate the population size and the select
 ```
 
 Now we compute the test result:
-
-``` r
+  
+```{r}
   tsinfer_output <- 
   tsinfer(
     tvec = tvec,
@@ -81,14 +87,13 @@ Now we compute the test result:
   )
 ```
 
-The selection coefficient for non-neutral model is in `s`, and so the value here is 0.0892549. The population size for non-neutral model is in `alpha`, and here is 1.643647410^{4}
+The selection coefficient for non-neutral model is in `s`, and so the value here is `r tsinfer_output$s`. The population size for non-neutral model is in `alpha`, and here is `r tsinfer_output$alpha`
 
-An archaeological application
------------------------------
+## An archaeological application
 
 Here is an example of using the FIT to identify pottery types that indicate selection. We are using frequencies of different decorative motifs in the Merzbach assemblage, Neolithic Germany (Crema et al. 2016; many other papers). We can load the data from the `evoarchdata` package on GitHub:
 
-``` r
+```{r}
 # pak::pkg_install("benmarwick/evoarchdata")
 library(evoarchdata)
 data("ceramics_lbk_merzbach")
@@ -96,7 +101,7 @@ data("ceramics_lbk_merzbach")
 
 Here's an overview of how each motif changes over time in this assemblage:
 
-``` r
+```{r}
 # get ordered factor of decoration types so we can order the plots nicely 
 suppressPackageStartupMessages(library(tidyverse))
 
@@ -127,11 +132,9 @@ ggplot(ceramics_lbk_merzbach_long,
   theme_minimal()
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
-
 To prepare the data for the FIT we need to reshape it to a long form, compute frequency as ratio of count of type of a interest to all other types, and drop decoration types with less than threee time points (we need a min of three time points to compute the FIT).
 
-``` r
+```{r}
 # reshape data for each decoration type to go into test:
 df <- ceramics_lbk_merzbach[ , 2:ncol(ceramics_lbk_merzbach)]
 time <- utils:::.roman2numeric(ceramics_lbk_merzbach$Phase)
@@ -157,10 +160,10 @@ for(i in 1:ncol(df)){
 list_of_dfs_three_or_more <- 
   keep(list_of_dfs, ~nrow(.x) >= 3)
 ```
-
+  
 We can prepare safe version of the FIT so we can use it in loops without breaking out of the loop when there is an error for one iteration
 
-``` r
+```{r}
 fit_safely <- 
   safely(fit, 
          otherwise = data.frame(fit_stat = NA,
@@ -169,7 +172,7 @@ fit_safely <-
 
 Now we can compute the FIT for each pottery decoration type:
 
-``` r
+```{r}
 # apply test to each decoration type
 df_fit_test_results <-
   list_of_dfs_three_or_more %>%
@@ -204,11 +207,9 @@ ggplot(ceramics_lbk_merzbach_long_sig,
   theme_minimal()
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
-
 We can subset each time series to see if we can identify episodes of selection among decoration types that might not show overall selection. First we need a function to isolate a data frame of rolling groups of three time points:
 
-``` r
+```{r}
 # Function to get df with rolling groups of 3
 # from https://stackoverflow.com/a/5543632/1036500
 df_with_rolling_idx <- function(df, window = 3) {
@@ -228,7 +229,7 @@ df_with_rolling_idx <- function(df, window = 3) {
 
 Now we can compute the FIT on sections of the time series for each decoration type to identify time coordinates where selection has occurred, even when the overall series does not indicate selection:
 
-``` r
+```{r}
 n <- 5
 merzbach_long_sig_mid_time_point <- 
 list_of_dfs %>% 
@@ -251,7 +252,6 @@ list_of_dfs %>%
   right_join(list_of_dfs %>% 
                keep(., ~nrow(.x) >= n) %>% # need at least 4 rows of a type
                bind_rows(.id = "type")) 
-#> Joining, by = c("type", "time", "count_this_one", "count_others", "frequency")
 
 # make type a factor so we can order the plots nicely 
 merzbach_long_sig_mid_time_point$type <- 
@@ -302,30 +302,9 @@ ggplot()  +
                 shape = sig))  +
   facet_wrap( ~ type, scales = "free_y") +
   theme_minimal()
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+
+
+
+
