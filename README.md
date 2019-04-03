@@ -1,7 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-signatselect: Identifying signatures of selection [![Travis build status](https://travis-ci.org/benmarwick/signatselect.svg?branch=master)](https://travis-ci.org/benmarwick/signatselect)
-==========================================================================================================================================================================================
+signatselect: Identifying signatures of selection
+=================================================
+
+[![Travis build status](https://travis-ci.org/benmarwick/signatselect.svg?branch=master)](https://travis-ci.org/benmarwick/signatselect) [![Binder](http://mybinder.org/badge_logo.svg)](http://beta.mybinder.org/v2/gh/benmarwick/signatselect/master?urlpath=rstudio)
 
 The goal of signatselect is to provide two core functions useful for investigating change over time in artefact assemblages (and genetic time-series data):
 
@@ -329,3 +331,5 @@ ggplot()  +
 ```
 
 <img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+
+Please note that the `signatselect` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.

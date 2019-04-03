@@ -9,7 +9,7 @@ Description: Infer population size and selection coefficient from time-series
     allele-frequency data. Recoded from OCAML tsinfer.
 Depends: nloptr, 
          limSolve
-License: MIT License
+License: MIT + file LICENSE
 RoxygenNote: 6.0.1.9000
 Suggests: 
     testthat
