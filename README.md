@@ -112,18 +112,52 @@ The selection coefficient for non-neutral model is in `s`, and so the value here
 An archaeological application
 -----------------------------
 
+### The frequency increment test
+
 Here is an example of using the FIT to identify pottery types that indicate selection. We are using frequencies of different decorative motifs in the Merzbach assemblage, Neolithic Germany (Crema et al. 2016; many other papers). We can load the data from the `evoarchdata` package on GitHub:
 
 ``` r
 # pak::pkg_install("benmarwick/evoarchdata")
 library(evoarchdata)
 data("ceramics_lbk_merzbach")
+
+# take a look
+ceramics_lbk_merzbach
+#>   Phase BT14 BT25 BT60 BT21 BT36 BT44 BT20 BT22 BT19 BT27 BT29 BT24 BT26
+#> 1   VII    0    0    0    0    0    0    1    0    2    0    1    9    0
+#> 2  VIII    0    0    0    0    0    0    0    0    5    0    1    8    0
+#> 3    IX    0    0    0    0    0    0    1    0    7    0    0   10    4
+#> 4     X    0    0    0    2    0    0    7   11   13    4    1   19    8
+#> 5    XI    7    1    0    4    2    1   39    3   49   12    0   46    7
+#> 6   XII   19    5    0    8    3    2   71   12  134   14    1   82   28
+#> 7  XIII   17    4    1    3    1    1   74    9  139   15    2   92   19
+#> 8   XIV   41    9    1    9    3    3   48    4   84   11    3   45    8
+#>   BT6 BT3 BT17 BT13 BT16 BT5 BT2 BT11 BT99 BT49 BT12 BT4 BT15 BT9 BT39
+#> 1   0   7    0   28    2  10  73   16    0    0   14  15    5  23    1
+#> 2   0   8    0   35    1  13  59    8    0    0   16   7    2   8    0
+#> 3   1  21    0   79    3   9  47   20    0    0   18   7    6   2    0
+#> 4   2  41    1   99    5  14  60   23    0    0   12   1    3   4    1
+#> 5   5 104    3  204    8  37 128   32    0    0   14   3    2  11    0
+#> 6   1 156    3  284   12  36 135   22    0    0   11   3    0   5    0
+#> 7   0 137    1  205    7  19  54    6    0    0    2   4    0   1    0
+#> 8   1  67    0   60    2   8  11    1    0    0    2   3    1   0    0
+#>   BT10 BT8 BT1 BT30 BT18 BT47 BT38 BT23
+#> 1  108 337 510    3    6    3    4    5
+#> 2   43 120 157    0    2    0    0    0
+#> 3   34  72  68    0    1    0    0    0
+#> 4   35  43  59    1    0    0    0    0
+#> 5   25  49  66    0    0    0    0    0
+#> 6    3  23  45    0    0    0    0    0
+#> 7    2   8  14    0    0    0    0    0
+#> 8    1   3   3    0    0    0    0    0
 ```
 
 Here's an overview of how each motif changes over time in this assemblage:
 
 ``` r
 # get ordered factor of decoration types so we can order the plots nicely 
+
+# install.packages("tidyverse")
 suppressPackageStartupMessages(library(tidyverse))
 
 decoration_types <- 
@@ -150,17 +184,46 @@ ggplot(ceramics_lbk_merzbach_long,
   geom_point() +
   facet_wrap(~variable,
              scales = "free_y") +
-  theme_minimal(base_size = 8)
+  theme_minimal(base_size = 8) +
+  ggtitle(str_glue('Ceramic decoration frequency data from Merzbach, Germany'))
 ```
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+There are many decoration types, so let's narrow it down to ones that have a maximum frequency of at least 50.
+
+``` r
+ceramics_lbk_merzbach_long_subset <-
+  ceramics_lbk_merzbach_long %>% 
+  group_by(variable) %>% 
+  filter(max(value) > max_n)
+
+# keep these decorations
+decorations_to_keep <- unique(as.character(ceramics_lbk_merzbach_long_subset$variable))
+
+# plot
+ggplot(ceramics_lbk_merzbach_long_subset,
+       aes(Phase,
+           value)) +
+  geom_line(aes(group = 1)) +
+  geom_point() +
+  facet_wrap(~variable,
+             scales = "free_y") +
+  theme_minimal(base_size = 8)
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 To prepare the data for the FIT we need to reshape it to a long form, compute frequency as ratio of count of type of a interest to all other types, and drop decoration types with less than threee time points (we need a min of three time points to compute the FIT).
 
 ``` r
 # reshape data for each decoration type to go into test:
-df <- ceramics_lbk_merzbach[ , 2:ncol(ceramics_lbk_merzbach)]
-time <- utils:::.roman2numeric(ceramics_lbk_merzbach$Phase)
+ceramics_lbk_merzbach_prop <- 
+  ceramics_lbk_merzbach %>% 
+  select(Phase, decorations_to_keep)
+
+df <- ceramics_lbk_merzbach_prop[ , 2:ncol(ceramics_lbk_merzbach_prop)]
+time <- utils:::.roman2numeric(ceramics_lbk_merzbach_prop$Phase)
 
 # compute frequency as ratio of count of type of interest to all other types
 list_of_dfs <- vector("list", ncol(df))
@@ -209,7 +272,8 @@ df_fit_test_results <-
   mutate(sig = ifelse(fit_p <= 0.05, "selection", "neutral"))
 
 ceramics_lbk_merzbach_long_sig <-
-  ceramics_lbk_merzbach_long %>%
+  ceramics_lbk_merzbach_long_subset %>%
+  ungroup %>% 
   left_join(df_fit_test_results %>% 
               select(type, sig), by = c("variable" = "type")) %>%
   mutate(Phase_num = utils:::.roman2numeric(as.character(Phase))) %>% 
@@ -227,17 +291,19 @@ ggplot(ceramics_lbk_merzbach_long_sig,
   geom_line() +
   facet_wrap(~variable,
              scales = "free_y") +
-  theme_minimal(base_size = 8)
+  theme_minimal(base_size = 8) +
+  ggtitle(str_glue('Application of the FIT to decoration frequency data from Merzbach.\nShowing only decoration types that have a maximum frequency of at least {max_n}'))
 ```
 
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
 
 We can subset each time series to see if we can identify episodes of selection among decoration types that might not show overall selection. First we need a function to isolate a data frame of rolling groups of three time points:
 
 ``` r
-# Function to get df with rolling groups of 3
+# Function to get df with rolling groups of n
 # from https://stackoverflow.com/a/5543632/1036500
-df_with_rolling_idx <- function(df, window = 3) {
+n <- 5
+df_with_rolling_idx <- function(df, window = n) {
   nr <- nrow(df)
   w <- window       # window size
   i <- 1:nr         # indices of the rows
@@ -255,11 +321,9 @@ df_with_rolling_idx <- function(df, window = 3) {
 Now we can compute the FIT on sections of the time series for each decoration type to identify time coordinates where selection has occurred, even when the overall series does not indicate selection:
 
 ``` r
-n <- 5
 merzbach_long_sig_mid_time_point <- 
 list_of_dfs %>% 
-  keep(., ~nrow(.x) >= n) %>% # need at least 4 rows of a type
-  bind_rows(.id = "type") %>% # to get rolling window of 3
+  bind_rows(.id = "type") %>% # to get rolling window of n
   nest(-type) %>%
   mutate(rolled = map(data, df_with_rolling_idx)) %>% 
   unnest(rolled) %>% 
@@ -271,13 +335,7 @@ list_of_dfs %>%
   mutate(fit_p = map(fit_test, ~.x$result %>% bind_rows)) %>%
   unnest(fit_p) %>%
   mutate(sig = ifelse(fit_p <= 0.05, "selection", "neutral")) %>% 
-  unnest(data) %>%                            
-  group_by(unid) %>%                          
-  slice(ceiling(n()/2)) %>% 
-  right_join(list_of_dfs %>% 
-               keep(., ~nrow(.x) >= n) %>% # need at least 4 rows of a type
-               bind_rows(.id = "type")) 
-#> Joining, by = c("type", "time", "count_this_one", "count_others", "frequency")
+  unnest(data) 
 
 # make type a factor so we can order the plots nicely 
 merzbach_long_sig_mid_time_point$type <- 
@@ -296,6 +354,13 @@ ceramics_lbk_merzbach_long_sig_to_plot_with_others <-
   arrange(type, time) %>% 
   mutate(type = fct_relevel(type, decoration_types))
 
+sig_decorations <- 
+  ceramics_lbk_merzbach_long_sig_to_plot_with_others %>% 
+  filter(sig == "selection") %>% 
+  pull(type) %>% 
+  as.character() %>% 
+  unique()
+
 # here we have the plot showing overall selection, and point-wise selection
 ggplot()  +
   geom_line(data = merzbach_long_sig_mid_time_point %>% 
@@ -307,9 +372,7 @@ ggplot()  +
             colour = "grey80",
             lineend = "round") +
   geom_point(data = merzbach_long_sig_mid_time_point %>% 
-               filter(sig == "selection") %>% 
-               group_by(type)  %>% 
-               filter(n() > 2),
+               filter(sig == "selection"),
              aes(time,
                  count_this_one,
                  group = type),
@@ -327,33 +390,84 @@ ggplot()  +
                 colour = sig,
                 shape = sig))  +
   facet_wrap( ~ type, scales = "free_y") +
-  theme_minimal(base_size = 8)
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
-#> geom_path: Each group consists of only one observation. Do you need to
-#> adjust the group aesthetic?
+  theme_minimal(base_size = 8) +
+  ggtitle(str_glue('Application of the FIT to decoration frequency data from Merzbach.\nShading highlights the data points where FIT identifies selection'))
 ```
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+
+### Estimating the population size and the selection coefficient
+
+We can compute the selection coefficient and related statistics for the decoration types that we previously identified as having a signal of selection.
+
+``` r
+decoration_types_tsinfer_output <- 
+list_of_dfs_three_or_more %>% 
+  keep(., names(.) %in% sig_decorations) %>% 
+  map(~tsinfer(
+    tvec = .x$time,
+    bvec = .x$count_this_one,
+    nvec = .x$count_others,
+    verbose = FALSE
+  )) %>% 
+  bind_rows(.id = "type")
+
+# inspect the output
+decoration_types_tsinfer_output
+#> # A tibble: 7 x 9
+#>   type    s.0     alpha.0     f0.0    LL.0       s     alpha     f0      LL
+#>   <chr> <dbl>       <dbl>    <dbl>   <dbl>   <dbl>     <dbl>  <dbl>   <dbl>
+#> 1 BT20      0 100000000.  0.000931  -640.   0.699     1.00e8 0.999  -1.16e4
+#> 2 BT19      0 100000000.  0.00186  -1004.   0.242     1.00e8 1.000  -1.41e3
+#> 3 BT24      0 100000000.  0.00844   -114.   0.124     1.00e8 0.998  -1.34e2
+#> 4 BT3       0        11.1 0.00655     30.1  0.213     1.00e8 0.900  -4.30e2
+#> 5 BT13      0        10.  0.0267      37.4  0.0670    1.00e1 0.993   3.63e1
+#> 6 BT2       0        42.2 0.0729      32.7  0.0863    1.14e2 0.0458  3.20e1
+#> 7 BT8       0        75.3 0.457       35.2 -0.323     1.00e8 1.000  -5.80e2
+```
+
+And we can visualise it:
+
+``` r
+# join with frequency data
+ceramics_lbk_merzbach_long_sig_to_plot_with_others_select <- 
+ceramics_lbk_merzbach_long_sig_to_plot_with_others %>% 
+  filter(type %in% sig_decorations) %>% 
+  left_join(decoration_types_tsinfer_output) %>% 
+  filter(s > 0) %>% 
+  mutate(sel_coef = s) %>% 
+  mutate(plot_label = str_glue('{type}, s = {round(sel_coef, 3)}'))
+#> Joining, by = "type"
+
+# here we have the plot showing overall selection, and point-wise selection
+library(scales)
+#> 
+#> Attaching package: 'scales'
+#> The following object is masked from 'package:purrr':
+#> 
+#>     discard
+#> The following object is masked from 'package:readr':
+#> 
+#>     col_factor
+ggplot(ceramics_lbk_merzbach_long_sig_to_plot_with_others_select)  +
+  geom_line(aes(time,
+                count_this_one, 
+                group = plot_label,
+                size = (sel_coef),
+                alpha = rescale(sel_coef))) +
+  geom_point(aes(time,
+                count_this_one, 
+                group = plot_label,
+                size =  rescale(sel_coef),
+                alpha = rescale(sel_coef)))  +
+  facet_wrap( ~ plot_label, scales = "free_y") +
+  scale_alpha_continuous(guide = FALSE) +
+  scale_size(NULL, range = c(1, 5)) + 
+  theme_minimal(base_size = 8) +
+  theme(legend.position="none") + 
+  ggtitle(str_glue('Computation of the selection coefficient on decoration frequency data from Merzbach'))
+```
+
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 Please note that the `signatselect` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
