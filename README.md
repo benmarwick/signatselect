@@ -87,8 +87,8 @@ How about the null situation, can we credibly detect a situation with no selecti
       time = no_selection$time,
       v = no_selection$freq
     )
-#>     fit_stat     fit_p
-#> 1 0.05725745 0.9565579
+#>    fit_stat     fit_p
+#> 1 0.6173547 0.5640275
 ```
 
 And we see a high p-value, indicating no selection in this time series.
@@ -147,7 +147,7 @@ tsinfer_output
 #> [1] 13.408
 ```
 
-The selection coefficient for non-neutral model is in `s`, and so the value here is 0.0892549. The population size for non-neutral model is in `alpha`, and here is 1.643647410^{4}
+The selection coefficient for non-neutral model is in `s`, and so the value here is 0.089. The population size for non-neutral model is in `alpha`, and here is 1.643647410^{4}
 
 An archaeological application
 -----------------------------
@@ -183,7 +183,7 @@ ceramics_lbk_merzbach
 
 Here's a sample of some of the pottery decorations, from [Shennan and Wilkinson (2001)](https://www.jstor.org/stable/2694174):
 
-<img src="/Users/bmarwick/Desktop/signatselect/man/figures/README-decorative-motifs.png" width="50%" style="display: block; margin: auto;" />
+<img src="man/figures/README-decorative-motifs.png" width="50%" style="display: block; margin: auto;" />
 
 Here's an overview of how each motif changes over time in this assemblage:
 
@@ -347,6 +347,7 @@ ggplot(ceramics_lbk_merzbach_long_sig,
   geom_line() +
   facet_wrap(~variable,
              scales = "free_y") +
+  guides(shape = FALSE) +
   theme_minimal(base_size = 8) +
   ggtitle(str_glue('Application of the FIT to decoration frequency data from Merzbach.\nShowing only decoration types that have a maximum frequency of at least {max_n}'))
 ```
@@ -456,7 +457,7 @@ ggplot()  +
 
 <img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
-The output is consistent with previous conclusions of the existence of selective forces acting on decorated LBK pottery from these sites [(Kandler and Shennan 2013)](https://doi.org/10.1016/j.jtbi.2013.03.006). We further note that selection is most widespread on the decorations in the later phases of site occupation, an observation also made by [Shennan and Wilkinson (2001)](https://www.jstor.org/stable/2694174) who describe a pro-novelty bias, possibly reflecting a concern to establish distinct local identities once the area had filled with people.
+The output is consistent with previous conclusions of the existence of selective forces acting on decorated LBK pottery from these sites [(Kandler and Shennan 2013)](https://doi.org/10.1016/j.jtbi.2013.03.006). We further note that selection is most widespread on the decorations in the later phases of site occupation, an observation also made by [Shennan and Wilkinson (2001)](https://www.jstor.org/stable/2694174) who describe a pro-novelty bias in the later phases, possibly reflecting a concern to establish distinct local identities once the area had filled with people.
 
 ### Estimating the population size and the selection coefficient
 
