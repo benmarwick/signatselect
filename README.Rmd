@@ -7,6 +7,7 @@ output: github_document
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   warning = FALSE,
+  message = FALSE,
   collapse = TRUE,
   comment = "#>",
   fig.path = "man/figures/README-",
@@ -22,7 +23,7 @@ The goal of signatselect is to provide two core functions useful for investigati
 
 - `fit()` the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. This is adapted directly from Feder, A. F., Kryazhimskiy, S., & Plotkin, J. B. (2014). Identifying signatures of selection in genetic time series. _Genetics_, 196(2), 509-522. <https://doi.org/10.1534/genetics.113.158220>.
 
-- `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from Hezekiah Akiva Bacovcin's <https://github.com/bacovcin/tsinfer-R>, who adapted it from Sergey Kryazhimskiy's OCaml lagnuage version of `tsinfer` at <https://github.com/skryazhi/tsinfer>. 
+- `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from Hezekiah Akiva Bacovcin's <https://github.com/bacovcin/tsinfer-R>, who adapted it from Sergey Kryazhimskiy's OCaml language version of `tsinfer` at <https://github.com/skryazhi/tsinfer>. 
 
 ## Installation
 
@@ -40,15 +41,23 @@ pak::pkg_install("benmarwick/signatselect")
 Here is an example of the `fit()`, the frequency increment test:
 
 ```{r fit-example}
-  # data slightly modified from Feder et al. Table 2 
-  time <- c(415 , 505 , 585 , 665 , 745 , 825 , 910)
-  freq <- c(0.06956522, 0.23125000, 0.62352941, 0.78494624, 0.93333333, 0.97979798, 0.98979592)
+# install.packages("tidyverse")
+suppressPackageStartupMessages(library(tidyverse))
+
+  # data slightly modified from Feder et al. Table S2 
+  feder_table_2 <- 
+  tibble(time = c(415 , 505 , 585 , 665 , 745 , 825 , 910),
+         freq = c(0.06956522, 0.23125000, 0.62352941, 0.78494624, 0.93333333, 0.97979798, 0.98979592))
 ```
 
 Let's take a look:
 
-```{r fit-plot, out.width="50%"}
-  plot(time, freq, type = 'b')
+```{r fit-plot, out.width="50%", fig.align='center'}
+  ggplot(feder_table_2,
+         aes(time, freq)) +
+  geom_line() +
+  geom_point(size = 5) +
+  theme_minimal()
 ```
 
 There's a trend of increasing frequencies, but is it a result of selection? Let's see:
@@ -57,17 +66,44 @@ There's a trend of increasing frequencies, but is it a result of selection? Let'
 library(signatselect)
 
     fit(
-      time = time,
-      v = freq
+      time = feder_table_2$time,
+      v = feder_table_2$freq
     )
 ```
 
 The result of the FIT, with the low p-value, indicates that selection is occuring in this time series.
 
+How about the null situation, can we credibly detect a situation with no selection? Here's a random uniform distribution of a variant: 
+
+```{r h0-fit-example, out.width="50%", fig.align='center'}
+ 
+  no_selection <- 
+  tibble(time = c(415 , 505 , 585 , 665 , 745 , 825 , 910),
+         freq = runif(7))
+
+  ggplot(no_selection,
+         aes(time, freq)) +
+  geom_line() +
+  geom_point(size = 5) +
+  theme_minimal()
+```
+
+```{r no-fit-test}
+    fit(
+      time = no_selection$time,
+      v = no_selection$freq
+    )
+```
+
+And we see a high p-value, indicating no selection in this time series.
+
 ### Infer population size and selection coefficient from time-series variant-frequency data
 
-Here is an example of `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. Here's some sample data:
-`tvec` contains sample times, `bvec` contains the number of samples of the focal variant (must be integers) and `nvec` containes total number of samples at each time point (must be integers). 
+Here is an example of `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. Here's some sample data: 
+
+- `tvec` contains sample times   
+- `bvec` contains the number of samples of the focal variant (must be integers) and,   
+- `nvec` containes total number of samples at each time point (must be integers)   
 
 ```{r}
   library(signatselect)
@@ -109,13 +145,16 @@ data("ceramics_lbk_merzbach")
 ceramics_lbk_merzbach
 ```
 
+Here's a sample of some of the pottery decorations, from [Shennan and Wilkinson (2001)](https://www.jstor.org/stable/2694174):
+
+```{r out.width="50%", fig.align='center', echo = FALSE}
+knitr::include_graphics(here::here("man/figures/README-decorative-motifs.png"))
+```
+
 Here's an overview of how each motif changes over time in this assemblage:
 
 ```{r}
 # get ordered factor of decoration types so we can order the plots nicely 
-
-# install.packages("tidyverse")
-suppressPackageStartupMessages(library(tidyverse))
 
 decoration_types <- 
 names(ceramics_lbk_merzbach)[-1] %>%
@@ -167,6 +206,27 @@ ggplot(ceramics_lbk_merzbach_long_subset,
   theme_minimal(base_size = 8)
 ```
 
+We can also view these in the classic archaeological visualiation, the battleship plot:
+
+```{r out.width="50%", fig.align='center'}
+phases <-  unique(ceramics_lbk_merzbach_long_subset$Phase)
+
+library(plotrix)
+
+ceramics_lbk_merzbach_matrix <- 
+ceramics_lbk_merzbach_long_subset %>% 
+  spread(variable, value) %>% 
+  select(-Phase) %>% 
+  as.matrix() 
+
+row.names(ceramics_lbk_merzbach_matrix) <- phases
+
+battleship.plot(ceramics_lbk_merzbach_matrix,
+                yaxlab = phases,
+                col = "grey",
+                main=str_glue("Merzbach ceramic decoration types (max N > {max_n})"))
+```
+
 To prepare the data for the FIT we need to reshape it to a long form, compute frequency as ratio of count of type of a interest to all other types, and drop decoration types with less than threee time points (we need a min of three time points to compute the FIT).
 
 ```{r}
@@ -211,7 +271,7 @@ fit_safely <-
 
 Now we can compute the FIT for each pottery decoration type:
 
-```{r}
+```{r, fig.align='center'}
 # apply test to each decoration type
 df_fit_test_results <-
   list_of_dfs_three_or_more %>%
@@ -240,7 +300,10 @@ ggplot(ceramics_lbk_merzbach_long_sig,
            colour = sig,
            shape = sig,
            group = variable)) +
-  geom_point() +
+  geom_point(size = 3) +
+  scale_color_viridis_d(name = "", 
+                        begin = 0.25, 
+                        end = 0.75) +
   geom_line() +
   facet_wrap(~variable,
              scales = "free_y") +
@@ -340,11 +403,17 @@ ggplot()  +
                 group = type,
                 colour = sig,
                 shape = sig))  +
+  scale_color_viridis_d(name = "", 
+                        begin = 0.25, 
+                        end = 0.75) + 
+  guides(shape = FALSE) +
   facet_wrap( ~ type, scales = "free_y") +
   theme_minimal(base_size = 8) +
   ggtitle(str_glue('Application of the FIT to decoration frequency data from Merzbach.\nShading highlights the data points where FIT identifies selection'))
 
 ```
+
+The output is consistent with previous conclusions of the existence of selective forces acting on decorated LBK pottery from these sites [(Kandler and Shennan 2013)](https://doi.org/10.1016/j.jtbi.2013.03.006). We further note that selection is most widespread on the decorations in the later phases of site occupation, an observation also made by [Shennan and Wilkinson (2001)](https://www.jstor.org/stable/2694174) who describe a pro-novelty bias, possibly reflecting a concern to establish distinct local identities once the area had filled with people.  
 
 ### Estimating the population size and the selection coefficient
 
@@ -399,7 +468,89 @@ ggplot(ceramics_lbk_merzbach_long_sig_to_plot_with_others_select)  +
   ggtitle(str_glue('Computation of the selection coefficient on decoration frequency data from Merzbach'))
 ```
 
+Decoration type B20 returns the highest selection coefficient. Looking back at the illustration of the decoration types above, we note that this is one of the more visually complex decoration types. 
 
 Please note that the `signatselect` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.
+
+
+```{r echo = FALSE, eval=FALSE}
+
+# schematic for FIT
+
+  library(ggplot2)
+  library(viridis)
+  n <- 30
+  mean1 <- 0
+  mean2 <- 0.5
+  sds <- 0.1
+  # create dataset with n brownian distributed points
+  # so rescaled frequencies are independent and approximately 
+  # normally distributed with mean 0
+  df1 <- data.frame(x = 1:n, 
+                    y = rnorm(n, mean1, sds))
+  # create a ggplot2 scatterplot
+  p1 <- ggplot(df1, aes(x, y)) + 
+    geom_point(size = 3,
+               colour = viridis(1)) +
+    geom_line( colour = viridis(1)) +
+    ylim(-1,1) +
+    geom_hline(yintercept = mean1, 
+               colour = viridis(1)) +
+    xlab("") +
+    ylab(expression(Y[i])) +
+    theme_minimal() +
+    ggtitle(expression(paste("Rescaled variant frequencies under ", bold("drift")))) 
+    
+  # add marginal density along the y axis
+  m1 <- 
+  ggExtra::ggMarginal(p1,
+                      type = "density", 
+                      margins = "y", 
+                      size = 3, 
+                      colour = viridis(1),
+                      fill = viridis(1))
+  
+  # create dataset with n brownian distributed points
+  df2 <- data.frame(x = 1:n, 
+                   y = rnorm(n, mean2, sds))
+  # create a ggplot2 scatterplot
+  p2 <- ggplot(df2, aes(x, y)) + 
+    geom_point(size = 3,
+               colour = viridis(5)[4]) +
+    geom_line(colour = viridis(5)[4]) +
+    geom_hline(yintercept = mean2, 
+               colour = viridis(5)[4]) +
+    ylim(-1,1) +
+    theme_minimal() +
+    xlab("Sampled time points") +
+    ylab(expression(Y[i])) +
+    ggtitle(expression(paste("Rescaled variant frequencies under ", bold("selection")))) + 
+    geom_segment(aes(
+      x =      0,
+      xend =   0,
+      y =      0,
+      yend =   0.5,
+    ),
+    size = 1,
+    colour = viridis(5)[1],
+    arrow = arrow(length = unit(0.25, "cm"))
+    ) 
+  # add marginal density along the y axis
+  m2 <- 
+  ggExtra::ggMarginal(p2,
+                      type = "density", 
+                      margins = "y", 
+                      size = 3, 
+                      colour = viridis(5)[4],
+                      fill = viridis(5)[4])
+
+
+library(cowplot)
+plot_grid(m1 , m2, ncol = 1)
+ggsave("man/figures/README-fit-schematic.png",
+       w = 7, h = 5)
+
+
+```
 
 

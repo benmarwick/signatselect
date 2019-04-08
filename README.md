@@ -9,7 +9,7 @@ The goal of signatselect is to provide two core functions useful for investigati
 
 -   `fit()` the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. This is adapted directly from Feder, A. F., Kryazhimskiy, S., & Plotkin, J. B. (2014). Identifying signatures of selection in genetic time series. *Genetics*, 196(2), 509-522. <https://doi.org/10.1534/genetics.113.158220>.
 
--   `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from Hezekiah Akiva Bacovcin's <https://github.com/bacovcin/tsinfer-R>, who adapted it from Sergey Kryazhimskiy's OCaml lagnuage version of `tsinfer` at <https://github.com/skryazhi/tsinfer>.
+-   `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from Hezekiah Akiva Bacovcin's <https://github.com/bacovcin/tsinfer-R>, who adapted it from Sergey Kryazhimskiy's OCaml language version of `tsinfer` at <https://github.com/skryazhi/tsinfer>.
 
 Installation
 ------------
@@ -29,18 +29,26 @@ Examples
 Here is an example of the `fit()`, the frequency increment test:
 
 ``` r
-  # data slightly modified from Feder et al. Table 2 
-  time <- c(415 , 505 , 585 , 665 , 745 , 825 , 910)
-  freq <- c(0.06956522, 0.23125000, 0.62352941, 0.78494624, 0.93333333, 0.97979798, 0.98979592)
+# install.packages("tidyverse")
+suppressPackageStartupMessages(library(tidyverse))
+
+  # data slightly modified from Feder et al. Table S2 
+  feder_table_2 <- 
+  tibble(time = c(415 , 505 , 585 , 665 , 745 , 825 , 910),
+         freq = c(0.06956522, 0.23125000, 0.62352941, 0.78494624, 0.93333333, 0.97979798, 0.98979592))
 ```
 
 Let's take a look:
 
 ``` r
-  plot(time, freq, type = 'b')
+  ggplot(feder_table_2,
+         aes(time, freq)) +
+  geom_line() +
+  geom_point(size = 5) +
+  theme_minimal()
 ```
 
-<img src="man/figures/README-fit-plot-1.png" width="50%" />
+<img src="man/figures/README-fit-plot-1.png" width="50%" style="display: block; margin: auto;" />
 
 There's a trend of increasing frequencies, but is it a result of selection? Let's see:
 
@@ -48,8 +56,8 @@ There's a trend of increasing frequencies, but is it a result of selection? Let'
 library(signatselect)
 
     fit(
-      time = time,
-      v = freq
+      time = feder_table_2$time,
+      v = feder_table_2$freq
     )
 #>   fit_stat      fit_p
 #> 1 3.262457 0.02238466
@@ -57,9 +65,41 @@ library(signatselect)
 
 The result of the FIT, with the low p-value, indicates that selection is occuring in this time series.
 
+How about the null situation, can we credibly detect a situation with no selection? Here's a random uniform distribution of a variant:
+
+``` r
+ 
+  no_selection <- 
+  tibble(time = c(415 , 505 , 585 , 665 , 745 , 825 , 910),
+         freq = runif(7))
+
+  ggplot(no_selection,
+         aes(time, freq)) +
+  geom_line() +
+  geom_point(size = 5) +
+  theme_minimal()
+```
+
+<img src="man/figures/README-h0-fit-example-1.png" width="50%" style="display: block; margin: auto;" />
+
+``` r
+    fit(
+      time = no_selection$time,
+      v = no_selection$freq
+    )
+#>     fit_stat     fit_p
+#> 1 0.05725745 0.9565579
+```
+
+And we see a high p-value, indicating no selection in this time series.
+
 ### Infer population size and selection coefficient from time-series variant-frequency data
 
-Here is an example of `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. Here's some sample data: `tvec` contains sample times, `bvec` contains the number of samples of the focal variant (must be integers) and `nvec` containes total number of samples at each time point (must be integers).
+Here is an example of `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. Here's some sample data:
+
+-   `tvec` contains sample times
+-   `bvec` contains the number of samples of the focal variant (must be integers) and,
+-   `nvec` containes total number of samples at each time point (must be integers)
 
 ``` r
   library(signatselect)
@@ -123,42 +163,32 @@ data("ceramics_lbk_merzbach")
 
 # take a look
 ceramics_lbk_merzbach
-#>   Phase BT14 BT25 BT60 BT21 BT36 BT44 BT20 BT22 BT19 BT27 BT29 BT24 BT26
-#> 1   VII    0    0    0    0    0    0    1    0    2    0    1    9    0
-#> 2  VIII    0    0    0    0    0    0    0    0    5    0    1    8    0
-#> 3    IX    0    0    0    0    0    0    1    0    7    0    0   10    4
-#> 4     X    0    0    0    2    0    0    7   11   13    4    1   19    8
-#> 5    XI    7    1    0    4    2    1   39    3   49   12    0   46    7
-#> 6   XII   19    5    0    8    3    2   71   12  134   14    1   82   28
-#> 7  XIII   17    4    1    3    1    1   74    9  139   15    2   92   19
-#> 8   XIV   41    9    1    9    3    3   48    4   84   11    3   45    8
-#>   BT6 BT3 BT17 BT13 BT16 BT5 BT2 BT11 BT99 BT49 BT12 BT4 BT15 BT9 BT39
-#> 1   0   7    0   28    2  10  73   16    0    0   14  15    5  23    1
-#> 2   0   8    0   35    1  13  59    8    0    0   16   7    2   8    0
-#> 3   1  21    0   79    3   9  47   20    0    0   18   7    6   2    0
-#> 4   2  41    1   99    5  14  60   23    0    0   12   1    3   4    1
-#> 5   5 104    3  204    8  37 128   32    0    0   14   3    2  11    0
-#> 6   1 156    3  284   12  36 135   22    0    0   11   3    0   5    0
-#> 7   0 137    1  205    7  19  54    6    0    0    2   4    0   1    0
-#> 8   1  67    0   60    2   8  11    1    0    0    2   3    1   0    0
-#>   BT10 BT8 BT1 BT30 BT18 BT47 BT38 BT23
-#> 1  108 337 510    3    6    3    4    5
-#> 2   43 120 157    0    2    0    0    0
-#> 3   34  72  68    0    1    0    0    0
-#> 4   35  43  59    1    0    0    0    0
-#> 5   25  49  66    0    0    0    0    0
-#> 6    3  23  45    0    0    0    0    0
-#> 7    2   8  14    0    0    0    0    0
-#> 8    1   3   3    0    0    0    0    0
+#> # A tibble: 8 x 37
+#>   Phase  BT14  BT25  BT60  BT21  BT36  BT44  BT20  BT22  BT19  BT27  BT29
+#>   <chr> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+#> 1 VII       0     0     0     0     0     0     1     0     2     0     1
+#> 2 VIII      0     0     0     0     0     0     0     0     5     0     1
+#> 3 IX        0     0     0     0     0     0     1     0     7     0     0
+#> 4 X         0     0     0     2     0     0     7    11    13     4     1
+#> 5 XI        7     1     0     4     2     1    39     3    49    12     0
+#> 6 XII      19     5     0     8     3     2    71    12   134    14     1
+#> 7 XIII     17     4     1     3     1     1    74     9   139    15     2
+#> 8 XIV      41     9     1     9     3     3    48     4    84    11     3
+#> # … with 25 more variables: BT24 <dbl>, BT26 <dbl>, BT6 <dbl>, BT3 <dbl>,
+#> #   BT17 <dbl>, BT13 <dbl>, BT16 <dbl>, BT5 <dbl>, BT2 <dbl>, BT11 <dbl>,
+#> #   BT99 <dbl>, BT49 <dbl>, BT12 <dbl>, BT4 <dbl>, BT15 <dbl>, BT9 <dbl>,
+#> #   BT39 <dbl>, BT10 <dbl>, BT8 <dbl>, BT1 <dbl>, BT30 <dbl>, BT18 <dbl>,
+#> #   BT47 <dbl>, BT38 <dbl>, BT23 <dbl>
 ```
+
+Here's a sample of some of the pottery decorations, from [Shennan and Wilkinson (2001)](https://www.jstor.org/stable/2694174):
+
+<img src="/Users/bmarwick/Desktop/signatselect/man/figures/README-decorative-motifs.png" width="50%" style="display: block; margin: auto;" />
 
 Here's an overview of how each motif changes over time in this assemblage:
 
 ``` r
 # get ordered factor of decoration types so we can order the plots nicely 
-
-# install.packages("tidyverse")
-suppressPackageStartupMessages(library(tidyverse))
 
 decoration_types <- 
 names(ceramics_lbk_merzbach)[-1] %>%
@@ -188,7 +218,7 @@ ggplot(ceramics_lbk_merzbach_long,
   ggtitle(str_glue('Ceramic decoration frequency data from Merzbach, Germany'))
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 There are many decoration types, so let's narrow it down to ones that have a maximum frequency of at least 50.
 
@@ -212,7 +242,30 @@ ggplot(ceramics_lbk_merzbach_long_subset,
   theme_minimal(base_size = 8)
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+We can also view these in the classic archaeological visualiation, the battleship plot:
+
+``` r
+phases <-  unique(ceramics_lbk_merzbach_long_subset$Phase)
+
+library(plotrix)
+
+ceramics_lbk_merzbach_matrix <- 
+ceramics_lbk_merzbach_long_subset %>% 
+  spread(variable, value) %>% 
+  select(-Phase) %>% 
+  as.matrix() 
+
+row.names(ceramics_lbk_merzbach_matrix) <- phases
+
+battleship.plot(ceramics_lbk_merzbach_matrix,
+                yaxlab = phases,
+                col = "grey",
+                main=str_glue("Merzbach ceramic decoration types (max N > {max_n})"))
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="50%" style="display: block; margin: auto;" />
 
 To prepare the data for the FIT we need to reshape it to a long form, compute frequency as ratio of count of type of a interest to all other types, and drop decoration types with less than threee time points (we need a min of three time points to compute the FIT).
 
@@ -287,7 +340,10 @@ ggplot(ceramics_lbk_merzbach_long_sig,
            colour = sig,
            shape = sig,
            group = variable)) +
-  geom_point() +
+  geom_point(size = 3) +
+  scale_color_viridis_d(name = "", 
+                        begin = 0.25, 
+                        end = 0.75) +
   geom_line() +
   facet_wrap(~variable,
              scales = "free_y") +
@@ -295,7 +351,7 @@ ggplot(ceramics_lbk_merzbach_long_sig,
   ggtitle(str_glue('Application of the FIT to decoration frequency data from Merzbach.\nShowing only decoration types that have a maximum frequency of at least {max_n}'))
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" style="display: block; margin: auto;" />
 
 We can subset each time series to see if we can identify episodes of selection among decoration types that might not show overall selection. First we need a function to isolate a data frame of rolling groups of three time points:
 
@@ -389,12 +445,18 @@ ggplot()  +
                 group = type,
                 colour = sig,
                 shape = sig))  +
+  scale_color_viridis_d(name = "", 
+                        begin = 0.25, 
+                        end = 0.75) + 
+  guides(shape = FALSE) +
   facet_wrap( ~ type, scales = "free_y") +
   theme_minimal(base_size = 8) +
   ggtitle(str_glue('Application of the FIT to decoration frequency data from Merzbach.\nShading highlights the data points where FIT identifies selection'))
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+
+The output is consistent with previous conclusions of the existence of selective forces acting on decorated LBK pottery from these sites [(Kandler and Shennan 2013)](https://doi.org/10.1016/j.jtbi.2013.03.006). We further note that selection is most widespread on the decorations in the later phases of site occupation, an observation also made by [Shennan and Wilkinson (2001)](https://www.jstor.org/stable/2694174) who describe a pro-novelty bias, possibly reflecting a concern to establish distinct local identities once the area had filled with people.
 
 ### Estimating the population size and the selection coefficient
 
@@ -414,16 +476,14 @@ list_of_dfs_three_or_more %>%
 
 # inspect the output
 decoration_types_tsinfer_output
-#> # A tibble: 7 x 9
-#>   type    s.0     alpha.0     f0.0    LL.0       s     alpha     f0      LL
-#>   <chr> <dbl>       <dbl>    <dbl>   <dbl>   <dbl>     <dbl>  <dbl>   <dbl>
-#> 1 BT20      0 100000000.  0.000931  -640.   0.699     1.00e8 0.999  -1.16e4
-#> 2 BT19      0 100000000.  0.00186  -1004.   0.242     1.00e8 1.000  -1.41e3
-#> 3 BT24      0 100000000.  0.00844   -114.   0.124     1.00e8 0.998  -1.34e2
-#> 4 BT3       0        11.1 0.00655     30.1  0.213     1.00e8 0.900  -4.30e2
-#> 5 BT13      0        10.  0.0267      37.4  0.0670    1.00e1 0.993   3.63e1
-#> 6 BT2       0        42.2 0.0729      32.7  0.0863    1.14e2 0.0458  3.20e1
-#> 7 BT8       0        75.3 0.457       35.2 -0.323     1.00e8 1.000  -5.80e2
+#> # A tibble: 5 x 9
+#>   type    s.0     alpha.0     f0.0    LL.0      s      alpha    f0      LL
+#>   <chr> <dbl>       <dbl>    <dbl>   <dbl>  <dbl>      <dbl> <dbl>   <dbl>
+#> 1 BT20      0 100000000.  0.000931  -640.   0.699 100000000. 0.999 -11568.
+#> 2 BT19      0 100000000.  0.00186  -1004.   0.242 100000000. 1.000  -1406.
+#> 3 BT24      0 100000000.  0.00844   -114.   0.124 100000000. 0.998   -134.
+#> 4 BT3       0        11.1 0.00655     30.1  0.213 100000000. 0.900   -430.
+#> 5 BT8       0        75.3 0.457       35.2 -0.323 100000000. 1.000   -580.
 ```
 
 And we can visualise it:
@@ -437,18 +497,9 @@ ceramics_lbk_merzbach_long_sig_to_plot_with_others %>%
   filter(s > 0) %>% 
   mutate(sel_coef = s) %>% 
   mutate(plot_label = str_glue('{type}, s = {round(sel_coef, 3)}'))
-#> Joining, by = "type"
 
 # here we have the plot showing overall selection, and point-wise selection
 library(scales)
-#> 
-#> Attaching package: 'scales'
-#> The following object is masked from 'package:purrr':
-#> 
-#>     discard
-#> The following object is masked from 'package:readr':
-#> 
-#>     col_factor
 ggplot(ceramics_lbk_merzbach_long_sig_to_plot_with_others_select)  +
   geom_line(aes(time,
                 count_this_one, 
@@ -468,6 +519,8 @@ ggplot(ceramics_lbk_merzbach_long_sig_to_plot_with_others_select)  +
   ggtitle(str_glue('Computation of the selection coefficient on decoration frequency data from Merzbach'))
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+
+Decoration type B20 returns the highest selection coefficient. Looking back at the illustration of the decoration types above, we note that this is one of the more visually complex decoration types.
 
 Please note that the `signatselect` project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By contributing to this project, you agree to abide by its terms.

@@ -31,7 +31,7 @@ fit <- function(time,
   # Get t statistic from the rescaled fitness increments
   fit_stat = as.numeric(t.test(Y)$statistic)
   # Calculate the p-value for the test statistic:
-  fit_p = t.test(abs(Y),  alternative = c(alternative))$p.value
+  fit_p = t.test(Y,  alternative = c(alternative))$p.value
   
   # get output a a two-column data frame
   output <- data.frame(fit_stat = fit_stat, 
