@@ -7,9 +7,9 @@ signatselect: Identifying signatures and strengths of selection
 
 The goal of signatselect is to provide two functions useful for investigating change over time in artefact assemblages (and genetic time-series data):
 
--   `fit()` the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. This is adapted directly from Feder, A. F., Kryazhimskiy, S., & Plotkin, J. B. (2014). Identifying signatures of selection in genetic time series. *Genetics*, 196(2), 509-522. <https://doi.org/10.1534/genetics.113.158220>.
+-   `fit()` the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. This is adapted directly from the algorithm published in Feder, A. F., Kryazhimskiy, S., & Plotkin, J. B. (2014). Identifying signatures of selection in genetic time series. *Genetics*, 196(2), 509-522. <https://doi.org/10.1534/genetics.113.158220> and Newberry's implementation of Feder's FIT for R at <https://github.com/mnewberry/ldrift> for their paper Newberry, et al. (2017). Detecting evolutionary forces in language change. *Nature*, 551(7679), 223–226. <https://doi.org/10.1038/nature24455>
 
--   `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from Hezekiah Akiva Bacovcin's <https://github.com/bacovcin/tsinfer-R>, who adapted it from Sergey Kryazhimskiy's OCaml language version of `tsinfer` at <https://github.com/skryazhi/tsinfer>.
+-   `tsinfer()` to estimate the population size and the selection coefficient favoring one variant over another from time-series variant-frequency data. This is adapted from Feder et al. (2014) and Hezekiah Akiva Bacovcin's <https://github.com/bacovcin/tsinfer-R>, who adapted it from Sergey Kryazhimskiy's OCaml language version of `tsinfer` at <https://github.com/skryazhi/tsinfer>.
 
 Installation
 ------------
@@ -87,7 +87,7 @@ How about the null situation, can we credibly detect a situation with no selecti
       v = no_selection$freq
     )
 #>     fit_stat     fit_p
-#> 1 -0.5013516 0.6374128
+#> 1 0.04908068 0.9627552
 ```
 
 And we see a high p-value, indicating no selection in this time series.
