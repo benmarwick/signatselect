@@ -1,11 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-signatselect: Identifying signatures of selection
-=================================================
+signatselect: Identifying signatures and strengths of selection
+===============================================================
 
 [![Travis build status](https://travis-ci.org/benmarwick/signatselect.svg?branch=master)](https://travis-ci.org/benmarwick/signatselect) [![Binder](http://mybinder.org/badge_logo.svg)](http://beta.mybinder.org/v2/gh/benmarwick/signatselect/master?urlpath=rstudio)
 
-The goal of signatselect is to provide two core functions useful for investigating change over time in artefact assemblages (and genetic time-series data):
+The goal of signatselect is to provide two functions useful for investigating change over time in artefact assemblages (and genetic time-series data):
 
 -   `fit()` the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. This is adapted directly from Feder, A. F., Kryazhimskiy, S., & Plotkin, J. B. (2014). Identifying signatures of selection in genetic time series. *Genetics*, 196(2), 509-522. <https://doi.org/10.1534/genetics.113.158220>.
 
@@ -68,7 +68,6 @@ The result of the FIT, with the low p-value, indicates that selection is occurin
 How about the null situation, can we credibly detect a situation with no selection? Here's a random uniform distribution of a variant:
 
 ``` r
- 
   no_selection <- 
   tibble(time = c(415 , 505 , 585 , 665 , 745 , 825 , 910),
          freq = runif(7))
@@ -87,8 +86,8 @@ How about the null situation, can we credibly detect a situation with no selecti
       time = no_selection$time,
       v = no_selection$freq
     )
-#>    fit_stat     fit_p
-#> 1 0.6173547 0.5640275
+#>     fit_stat     fit_p
+#> 1 -0.5013516 0.6374128
 ```
 
 And we see a high p-value, indicating no selection in this time series.
@@ -102,8 +101,7 @@ Here is an example of `tsinfer()` to estimate the population size and the select
 -   `nvec` containes total number of samples at each time point (must be integers)
 
 ``` r
-  library(signatselect)
-  # adapted from https://github.com/skryazhi/tsinfer
+  # data adapted from https://github.com/skryazhi/tsinfer
   tvec = c(0, 10, 20)
   bvec = c(2000, 4000, 6000)
   nvec = c(10000, 10000, 10000)
