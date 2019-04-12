@@ -8,10 +8,11 @@ Maintainer: Ben Marwick <benmarwick@gmail.com>
 Description: Infer population size and selection coefficient from time-series
     allele-frequency data. Recoded from OCAML tsinfer.
 Imports: nloptr, 
-         limSolve
+         limSolve,
+         pak,
+         tidyverse
 License: MIT + file LICENSE
 RoxygenNote: 6.0.1.9000
 Suggests: 
-    testthat,
-    pak,
-    tidyverse
+    testthat
+ 
