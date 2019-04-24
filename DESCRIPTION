@@ -10,7 +10,8 @@ Description: Infer population size and selection coefficient from time-series
 Imports: nloptr, 
          limSolve,
          pak,
-         tidyverse
+         tidyverse,
+         plotrix
 License: MIT + file LICENSE
 RoxygenNote: 6.0.1.9000
 Suggests: 
