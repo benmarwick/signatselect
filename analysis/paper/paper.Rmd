@@ -1,0 +1,70 @@
+
+# Identifying Signatures of Artefact Selection in Archaeological Phases
+
+## Introduction
+
+Drift and selection are two important processes that have driven variation in artefact production in prehistory. Drift refers to neutral evolution, where variation in artefact types is structured by mutation rates and stochastic sampling effects such as population size, migration and dispersal. Selection refers to specific patterns of variation in artefact types that are favoured over others, likely because they confer some advantage on the user or the user's community. In many archaeological studies neutrality is presented as the null, or default, model. Artefact data are tested against a neutral model to quantitatively test the fit of artefact variation through time to neutral expectations. This focus on neutral processes has been very productive, resulting in a variety of new methods and novel archaeological investigations resulting from the application of these methods. 
+
+However, the task of identifying and quantifing selective processes in an archaeological time series remains a challenge that has been largely unexplored. We lack easy-to-use methods for distinguishing whether or not selection is present in an archaeological time series. In this paper we consider the problem of determining whether selection has played a role in the observed frequencies of artefacts over time. We present the frequency increment test as simple statistical test to aid in the detection and quantification of selective processes in the archaeological record. We describe an R package developed to make it easy to use frequency increment test.  We demonstrate the method by applying it to an assemblage of Neolithic pottery from Merzbach, Germany. 
+
+## Background
+
+Processes of selection are central to Darwinian evolution. @darwin1859origin defined natural selection as the 'preservation of favourable variations, and the rejection of injurious variations'. In a biological context, natural selection occurs when three conditions are met: (1) phenotypic variation (variation among individuals in some attribute or trait), (2) fitness variation (a consistent relationship between that trait and mating ability, fertilizing ability, fertility, fecundity, and/or survivorship), and (3) inheritance (a consistent relationship, for that trait, between parents and their offspring, which is at least partially independent of common environment effects) [@endler1992signals]. In an archaeological context, these three concepts have loose analogues with (1) artefact variation, e.g. in their counts over time, and also in metric and technological attributes, (2) variation in the effectiveness of the artefact to do its job, e.g. weapons systems, cooking vessels, and (3) cultural transmission of information, e.g. through observation, teaching, and other forms of social transmission. While some archaeologists reject this analogy entirely [@ingold2013prospect], the general approach is held to be core theory by many, and there are lively debates surrounding the most useful specific links between biological and cultural evolution. For example, is culture more analogous to an organism, genes, an epidemiological phenomenon, or does the diversity of social transmission processes and human psychology introduce unique biases that defy biological analogies [@mesoudi2006towards; @cullen1993darwinian; @boyd1988culture]? Is cultural transmission best considered as a preservative mechanism allowing selection among different variants, or as a transformative process in which individuals recreate variants each time they are transmitted [@claidiere2014darwinian; @acerbi2015if]? 
+
+### Drift
+
+Neutral evolution as a process shaping archaeological assemblages can be traced back to @binford1963red who applied the genetic concept of frequencies of traits that vary due to random sampling error, and attempted to detect drift using chi-square and ANOVA tests on artefact counts and metric attributes of flaked stone blades. @dunnell1978style similarly claimed that the frequencies of neutral elements of artefact design can be described by stochastic processes. He also drew a contrast between neutral elements, which he labelled stylistic, and functional elements that he claimed are subject to selection and show distinctive monotonic increases and decreases in their frequencies [@dunnell1980evolutionary]. @neiman1995stylistic introduced an influential new direction to archaeological thinking about neutral evolution by drawing from a theory of neutral allelesfrom the Wright-Fisher model of population genetics, from which he borrowed Ewen's sampleing formula [@ewens1972sampling]. Neiman quantified the diversity of artefacts from a sample and compared it with the diversity expected by Ewens' sampling formula. Where the observed and expected diversities were similar, Neiman concluded the processes underlying the production of the artefacts are most likely governed by random drift. He analysed 26 decorative elements (that were assumed to be neutral) in Southern Illinois Woodland ceramics over seven chronological phases, and showed that the patterns of within- and between-assemblage diversity in those stylistic elements could be explained by neutral evolution and inter-group transmission. 
+
+Many subsequent studies have followed Neiman's approach of testing neutrality (often in ceramic asseblages over time) using statistical methods from population genetics used to analyse allelic frequency configurations at individual loci [@lipo2001science; @shennan2001ceramic; @kohler2004vessels; @steele2010ceramic; @premo2011spatial]. An extension of this is the comparison of the shape of empirical rank-abundance distributions of cultural variants to power law distributions (as the theoretical neutral distribution) to assess the consistency between observed data and a hypothesis of neutral evolution. This has been attempted for baby names in the US, US patents and their citations, dog breeds in the US, and German Neolithic pottery motifs [@bentley2004random; @hahn2003drift; @herzog2004random]. This power law based approach depends on the completeness of the data set considered, because if rare variants are not included in the sample, empirical patterns will appear consistent with  neutral evolution even in situations where selection is occuring [@o2017inferring]. 
+
+Although these approaches have lead to many new insights, they have several limitations. Time-averaging in archaeological assemblages can result in inflated richness measures that confound the use of methods of assessing neutrality based on assemblage diversity [@premo_cultural_2014; @madsen_unbiased_2012]. Failure to reject the null hypothesis of neutral selection, as measured by assemblage diversity, does not necessarily exclude selection occuring on other attributes in the assemblage, impling a mixture of evolutionary processes may be more realistic [@steele2010ceramic]. When diversity stasitics are used to test for neutrality, there is a assumption of population sizes and mutation rates at equilibium, which may not be true in all archaeological applications [@equilibrium_2013]. To address these limitations, @crema2014approximate have introduced substiantially different approach to evaluating neutrality is demonstrated by studies using generative inference frameworks. These aim to evaluate the consistency of a number of transmission hypotheses (e.g. unbiased transmission, frequency-dependent selection, and pro-novelty selection) with archaeological data while also considering that demographic and cultural attributes are not in equilibrium [@kandler2018generative]. 
+
+This approach uses agent-based model simulations to generate pseudo-data of frequency changes of the different cultural variants over successive phases using a specific model of cultural transmission processes. The various pseudo-datasets are then statistically compared to the observed data using approximate Bayesian computation (ABC). This comparison allows certain hypothesized models of transmission to be rejected as inconsistent with the empirical data. This approach has been employed on Neolithic stone arrowheads [@edinborough2015abc; crema2014approximate], and pottery [@crema2016revealing]. While this approach overcomes the limitations of the approaches by Neiman et al., and produces richly informative results, its application may be limited by its complexity (requiring informed estimiates of prior values to input into calculations) and computational intensity (requiring high-performance computing facilities). Furthermore, these generative models operate at the scale of the population, making it difficult to get information about the evolutionary processes operating on specific cultural variants. 
+
+Many types of Neutrality: https://www.ncbi.nlm.nih.gov/pubmed/20492093
+
+### Selection
+
+Studies of evolutionary processes of specific cultural variants have tended to focus on identifying selection rather than neutrality, and lack the quantitative rigor of methods looking neutrality. An oft-cited example of artefact-level evolutionary processes is the replacement of the hand-powered spear or javelin bythe spear-thrower, or atlatl, at around 9,000 years ago, and that in turn being replaced by the bow-and-arrow at around 2,000 years ago in various parts North America [@goodale2011natural]. Each new type of hunting technology confers fitness because they increase the distance that a projectile can be launched, reducing the hunter's risk of harm by putting more distance between the hunter and their prey, and reducing the risk of revealing themselves to the prey. The innovations also increase the accuracy of the projectile which reducing the risk of a failed hunt. The example demonstrates phenotypic variation (the different weapon systems), fitness variation (the different levels of risk each system has for the hunter) and inheritance (tranmission of information about how to make the weapons between individuals, spanning many generations).
+
+The spear-atlatl-bow-and-arrow example seems like a good fit with Darwinian concepts, but the attribution to selective process is casual and difficult to falsify. This general approach of detecting selection of cultural traits by identifying the replacement of one trait by another with that has greater fitness-enhancing properties is difficult to generalise beyond highly functional objects. This is because for many types of artefact it is not at all obvious what their connection is to human mating ability, fertilizing ability, fertility, fecundity, and/or survivorship. 
+
+Experimental archaeology may help to identify certain physical characteristics that we might consider more efficient or optimal and thus fitness-enhancing, such as for hunting weapons. But for many artefact types we lack a robust system for bench-marking their relative contribution to fitness. For example, seemingly non-functional elements, such as pottery decorations, may have no effect on the effectiveness of the pot to cook or store food, but may be subject to selective processes because they may, for example, actively function as signals of group membership, which increases fitness by ensuring access to resources necessary for survival [@wiessner1983style; @wiessner1984reconsidering; @hegmon1992archaeological]. Cultural niche construction may result in selection of artefacts due to fitness metrics that are optimal for that niche, but are unrelated to human mating ability [@laland_niche_2010].
+
+In most archaeological studies we do not have the kinds of direct, local ethnographic analogies needed to identify the subtle fitness-increasing functions of traits. In the absence of direct historical analogy, we may turn to behavioural ecology to identify connections between archaeological evidence an adaptive behaviours, but that also does not supply optimisation logic for many artefact traits that we routinely measure, leaving us with few options for robustly identifying traits that directly increase fitness. 
+
+This limitation of analogy to identify traits under selection highlights the need for quantitative methods to detect and quantify selection.
+
+Detecting selection @brantingham_detecting_2010
+
+
+
+
+
+## Methods and materials
+
+- FIT
+- most likely population size (N) & selection coefficient (s) with tsinfer
+
+- Merzbach ceramics
+
+## Results
+
+## Discussion
+
+- limitations
+
+## Conclusion
+
+
+## Notes:
+
+underlying assumption that cultural variants whose frequencies are modelled are selectively neutral is hard to prove https://www-sciencedirect-com.offcampus.lib.washington.edu/science/article/pii/S0022519313000982
+
+
+
+defining +ve selection in genome: https://www.ncbi.nlm.nih.gov/portal/utils/pageresolver.fcgi?recordid=5aebb95e9ad83a19450d473a
+
+
+tests for neutrality: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2727393/
+
